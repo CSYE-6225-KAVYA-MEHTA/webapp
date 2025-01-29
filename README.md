@@ -7,7 +7,7 @@ CSYE 6225
 Server Operating System: Windows
 Programming Language: JavaScript
 Relational Database: MySQL
-Backend Framework: Any open-source framework such as Spring, Hibernate, etc.
+Backend Framework: NodeJS
 ORM Framework:Sequelize
 
 ### 1. Install Dependencies
