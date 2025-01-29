@@ -14,7 +14,9 @@ const healthCheck = async (req, res) => {
     if (
       Object.keys(req.body).length > 0 ||
       Object.keys(req.query).length > 0 ||
-      req.get("Content-Length") > 0
+      req.get("Content-Length") > 0 ||
+      req.get("Authorization") ||
+      req.get("authentication")
     ) {
       return res.status(400).header("Cache-Control", "no-cache").send();
     }
