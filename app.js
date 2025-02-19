@@ -21,7 +21,6 @@ app.get("/healthz", healthCheck);
 app.all("/healthz", (req, res) => {
   res.status(405).header("Cache-Control", "no-cache").send();
 });
-
 // Start the server
 if (require.main === module) {
   const server = app.listen(PORT, () => {
