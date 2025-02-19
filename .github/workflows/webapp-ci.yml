@@ -1,4 +1,4 @@
-name: Webapp CI
+name: CI Pipeline
 
 on:
   pull_request:
@@ -19,7 +19,7 @@ jobs:
         ports:
           - ${{ secrets.DB_PORT }}:3306
 
-    steps:
+    steps: # Moved steps outside services
       - name: Checkout repository
         uses: actions/checkout@v3
 
