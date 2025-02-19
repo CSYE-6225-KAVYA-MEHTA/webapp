@@ -2,7 +2,7 @@ require("dotenv").config(); // Load environment variables
 const express = require("express");
 const { healthCheck } = require("./controllers/healthCheckController");
 
-const app= = express();
+const app = express();
 const PORT = process.env.PORT;
 
 // Middleware to catch JSON parsing errors
