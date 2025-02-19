@@ -13,7 +13,7 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
           MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
 
         ports:
@@ -41,7 +41,7 @@ jobs:
           echo "Checking MySQL connection..."
           mysql -h "127.0.0.1" -u"${{ secrets.DB_USERNAME }}" -p"${{ secrets.DB_PASSWORD }}" -e "SHOW DATABASES;" || true
 
-      - name: Debug MySQL Secrets (No Passwords)
+      - name: Debug MySQL Secrets
         run: |
           echo "DB_USER=${{ secrets.DB_USERNAME }}"
           echo "DB_DATABASE=${{ secrets.DB_DATABASE }}"
