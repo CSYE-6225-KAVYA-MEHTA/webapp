@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: WEBAPP CI
 
 on:
   pull_request:
@@ -11,30 +11,75 @@ jobs:
 
     services:
       mysql:
-        image: mysql:latest
+        image: mysql:8.0
         env:
-          MYSQL_DATABASE: ${{ secrets.DB_DATABASE}}
-          MYSQL_USER: ${{ secrets.DB_USERNAME }}
-          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
         ports:
-          - ${{ secrets.DB_PORT }}:${{ secrets.DB_PORT }}
-steps:
-  - name: Checkout repository
-    uses: actions/checkout@v3
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
-  - name: Setup Node.js
-    uses: actions/setup-node@v3
-    with:
-      node-version: 18
+    steps: # Moved steps outside services
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-  - name: Install dependencies
-    run: npm install
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
 
-  - name: Run tests
-    env:
-      DB_HOST: ${{ secrets.DB_HOST }}
-      DB_PORT: ${{ secrets.DB_PORT }}
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_NAME: ${{ secrets.DB_DATABASE }}
-    run: npm test
+      - name: Install dependencies
+        run: npm install
+
+      - name: Debug MySQL Connection
+        run: |
+          echo "Checking MySQL connection..."
+          mysql -h "127.0.0.1" -u"${{ secrets.DB_USERNAME }}" -p"${{ secrets.DB_PASSWORD }}" -e "SHOW DATABASES;" || true
+
+      - name: Debug MySQL Secrets (No Passwords)
+        run: |
+          echo "DB_USER=${{ secrets.DB_USERNAME }}"
+          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}"
+          echo "DB_HOST=localhost"
+          echo "DB_ROOT_PASSWORD is set"
+
+      - name: Ensure Database is Ready
+        run: |
+          echo "Waiting for MySQL to be fully ready..."
+          for i in {1..10}; do
+            mysql -h "127.0.0.1" -u"${{ secrets.DB_USERNAME }}" -p"${{ secrets.DB_PASSWORD }}" -e "SELECT 1" && break
+            echo "MySQL not ready yet. Retrying in 5 seconds..."
+            sleep 5
+          done
+
+      - name: Ensure `Checks` Table Exists
+        run: |
+          echo "Creating missing tables if necessary..."
+          mysql -h "127.0.0.1" -u"${{ secrets.DB_USERNAME }}" -p"${{ secrets.DB_PASSWORD }}" -D "${{ secrets.DB_DATABASE }}" -e "
+          CREATE TABLE IF NOT EXISTS Checks (
+            checkId INT AUTO_INCREMENT PRIMARY KEY,
+            datetime DATETIME NOT NULL
+          ) ENGINE=InnoDB;
+          SHOW TABLES;
+          "
+
+      - name: Configure Environment Variables
+        run: |
+          echo DB_USER=${{ secrets.DB_USERNAME }}
+          echo DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          echo DB_NAME=${{ secrets.DB_DATABASE }}
+          echo DB_HOST=localhost
+          echo PORT=${{ secrets.PORT }}
+
+      - name: Run tests
+        env:
+          DB_HOST: localhost
+          PORT: ${{ secrets.PORT }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+        run: npm test
