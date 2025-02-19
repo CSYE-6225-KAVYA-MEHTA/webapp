@@ -32,6 +32,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Debug MySQL Secrets (No Passwords)
+        run: |
+          echo "DB_USER=${{ secrets.DB_USER }}"
+          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}"
+          echo "DB_HOST=${{ secrets.DB_HOST }}"
+          echo "DB_ROOT_PASSWORD is set"
+
       - name: Configure Environment Variables
         run: |
           echo DB_USER=${{ secrets.DB_USER }}
