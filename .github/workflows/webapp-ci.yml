@@ -17,7 +17,7 @@ jobs:
           MYSQL_USER: ${{ secrets.DB_USER }}
           MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports:
-          - ${{ secrets.PORT }}:${{ secrets.PORT }}
+          - 3306:3306
 
     steps: # Moved steps outside services
       - name: Checkout repository
