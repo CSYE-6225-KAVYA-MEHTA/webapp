@@ -11,13 +11,18 @@ jobs:
 
     services:
       mysql:
-        image: mysql:latest
+        image: mysql:8.0
         env:
           MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
           MYSQL_USER: ${{ secrets.DB_USER }}
           MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports:
           - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 --user=root --password=$DB_PASSWORD"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
 
     steps: # Moved steps outside services
       - name: Checkout repository
@@ -25,9 +30,26 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
+        with:
+          node-version: "18"
 
       - name: Install dependencies
         run: npm install
+
+      - name: Configure Environment Variables
+        run: |
+          echo DB_USER=${{ secrets.DB_USER }}
+          echo DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          echo DB_NAME=${{ secrets.DB_NAME }}
+          echo DB_HOST=${{ secrets.DB_HOST }}
+          echo PORT=${{ secrets.PORT }}
+
+      - name: Wait for MySQL to be ready
+        run: |
+          until mysqladmin ping -h "127.0.0.1" --silent; do
+            echo "Waiting for MySQL to be ready..."
+            sleep 5
+          done
 
       - name: Run tests
         env:
