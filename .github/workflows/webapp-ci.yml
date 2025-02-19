@@ -41,7 +41,7 @@ jobs:
         run: |
           echo "DB_USER=${{ secrets.DB_USER }}"
           echo "DB_DATABASE=${{ secrets.DB_DATABASE }}"
-          echo "DB_HOST=localhost
+          echo "DB_HOST=localhost"
           echo "DB_ROOT_PASSWORD is set"
 
       - name: Configure Environment Variables
@@ -49,12 +49,12 @@ jobs:
           echo DB_USER=${{ secrets.DB_USER }}
           echo DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           echo DB_NAME=${{ secrets.DB_NAME }}
-          echo DB_HOST=localhost
+          echo DB_HOST=${{ secrets.DB_HOST }}
           echo PORT=${{ secrets.PORT }}
 
       - name: Run tests
         env:
-          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_HOST: localhost
           PORT: ${{ secrets.PORT }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
