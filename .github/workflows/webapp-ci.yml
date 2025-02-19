@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: Webapp CI
 
 on:
   pull_request:
@@ -13,28 +13,29 @@ jobs:
       mysql:
         image: mysql:latest
         env:
-          MYSQL_DATABASE: ${{ secrets.DB_DATABASE}}
-          MYSQL_USER: ${{ secrets.DB_USERNAME }}
+          MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
+          MYSQL_USER: ${{ secrets.DB_USER }}
           MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports:
-          - ${{ secrets.DB_PORT }}:${{ secrets.DB_PORT }}
-steps:
-  - name: Checkout repository
-    uses: actions/checkout@v3
+          - ${{ secrets.DB_PORT }}:3306
 
-  - name: Setup Node.js
-    uses: actions/setup-node@v3
-    with:
-      node-version: 18
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-  - name: Install dependencies
-    run: npm install
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-  - name: Run tests
-    env:
-      DB_HOST: ${{ secrets.DB_HOST }}
-      DB_PORT: ${{ secrets.DB_PORT }}
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_NAME: ${{ secrets.DB_DATABASE }}
-    run: npm test
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_DATABASE }}
+        run: npm test
