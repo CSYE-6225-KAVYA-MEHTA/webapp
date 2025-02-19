@@ -15,7 +15,7 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
           MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
-          MYSQL_USER: ${{ secrets.DB_USER }}
+          MYSQL_USER: ${{ secrets.DB_USERNAME }}
           MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports:
           - 3306:3306
@@ -39,17 +39,17 @@ jobs:
 
       - name: Debug MySQL Secrets (No Passwords)
         run: |
-          echo "DB_USER=${{ secrets.DB_USER }}"
+          echo "DB_USER=${{ secrets.DB_USERNAME }}"
           echo "DB_DATABASE=${{ secrets.DB_DATABASE }}"
           echo "DB_HOST=localhost"
           echo "DB_ROOT_PASSWORD is set"
 
       - name: Configure Environment Variables
         run: |
-          echo DB_USER=${{ secrets.DB_USER }}
+          echo DB_USER=${{ secrets.DB_USERNAME }}
           echo DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          echo DB_NAME=${{ secrets.DB_NAME }}
-          echo DB_HOST=${{ secrets.DB_HOST }}
+          echo DB_NAME=${{ secrets.DB_DATABASE }}
+          echo DB_HOST=localhost
           echo PORT=${{ secrets.PORT }}
 
       - name: Run tests
