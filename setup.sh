@@ -21,7 +21,7 @@ sudo systemctl enable mysql
 
 echo "Creating Databse..."
 sudo mysql -e "CREATE DATABASE IF NOT EXISTS Health_Check;"
-;;
+
 sudo mysql -u root -p
 sudo mysql -e "CREATE USER IF NOT EXISTS 'root'@'${address}' IDENTIFIED BY 'root';"
 sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'${address}' WITH GRANT OPTION;"
