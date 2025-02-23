@@ -2,7 +2,7 @@ name: Packer Build CI
 
 on:
   push:
-    branches: ["main"] # ✅ Runs only when a PR is merged into main
+    branches: ["main"]
 
 jobs:
   build:
