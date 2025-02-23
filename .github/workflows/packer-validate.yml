@@ -34,16 +34,17 @@ jobs:
         run: packer fmt -recursive .
 
       - name: Validate Packer Template
-        run: packer validate \
-          -var "aws_region=$AWS_REGION" \
-          -var "subnet_id=$SUBNET_ID" \
-          -var "source_ami=$SOURCE_AMI" \
-          -var "dev_user=$DEV_USER" \
-          -var "demo_user=$DEMO_USER" \
-          -var "aws_access_key=$AWS_ACCESS_KEY" \
-          -var "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" \
-          -var "security_group_id=$SECURITY_GROUP_ID" \
-          -var "db_username=$DB_USERNAME" \
-          -var "db_password=$DB_PASSWORD" \
-          -var "db_database=$DB_DATABASE" \
+        run: |
+          packer validate \
+          -var "aws_region=${{ env.AWS_REGION }}" \
+          -var "subnet_id=${{ env.SUBNET_ID }}" \
+          -var "source_ami=${{ env.SOURCE_AMI }}" \
+          -var "dev_user=${{ env.DEV_USER }}" \
+          -var "demo_user=${{ env.DEMO_USER }}" \
+          -var "aws_access_key=${{ env.AWS_ACCESS_KEY }}" \
+          -var "aws_secret_access_key=${{ env.AWS_SECRET_ACCESS_KEY }}" \
+          -var "security_group_id=${{ env.SECURITY_GROUP_ID }}" \
+          -var "db_username=${{ env.DB_USERNAME }}" \
+          -var "db_password=${{ env.DB_PASSWORD }}" \
+          -var "db_database=${{ env.DB_DATABASE }}" \
           img-creation.pkr.hcl
