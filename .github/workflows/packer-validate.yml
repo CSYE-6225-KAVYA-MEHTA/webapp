@@ -61,7 +61,7 @@ jobs:
           -var "vpc_id=${{ env.VPC_ID }}" \
           img-creation.pkr.hcl
 
-      - name: Upload Validation Results
+      - name: Validation Results Upload
         uses: actions/upload-artifact@v4
         with:
           name: validation-results
