@@ -41,8 +41,8 @@ jobs:
           -var "source_ami=${{ env.SOURCE_AMI }}" \
           -var "dev_user=${{ env.DEV_USER }}" \
           -var "demo_user=${{ env.DEMO_USER }}" \
-          -var "aws_access_key=${{ env.AWS_ACCESS_KEY }}" \
-          -var "aws_secret_access_key=${{ env.AWS_SECRET_ACCESS_KEY }}" \
+          -var "access_key=${{ env.AWS_ACCESS_KEY }}" \
+          -var "secret_key=${{ env.AWS_SECRET_ACCESS_KEY }}" \
           -var "security_group_id=${{ env.SECURITY_GROUP_ID }}" \
           -var "db_username=${{ env.DB_USERNAME }}" \
           -var "db_password=${{ env.DB_PASSWORD }}" \
