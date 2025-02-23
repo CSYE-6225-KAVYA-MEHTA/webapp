@@ -46,9 +46,17 @@ jobs:
 
       - name: Install Packer
         run: |
+          # Remove existing Packer file/directory if it exists
+          sudo rm -rf /usr/local/bin/packer
+
+          # Download and extract Packer
           curl -fsSL -o packer.zip https://releases.hashicorp.com/packer/1.7.3/packer_1.7.3_linux_amd64.zip
           unzip -o packer.zip || (echo "Packer extraction failed!" && exit 1)
+
+          # Move the new Packer binary to the correct location
           sudo mv -f packer /usr/local/bin/
+
+          # Verify installation
           packer --version
 
       - name: Run Packer
