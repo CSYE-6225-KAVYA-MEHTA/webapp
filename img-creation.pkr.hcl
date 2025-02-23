@@ -135,7 +135,7 @@ build {
 
 
 provisioner "file" {
-  source      = "C:/Users/kavya/Downloads/webapp-demo.zip"  // Path to your webapp zip file on your local machine
+  source      = "webapp.zip"  
   destination = "/home/ubuntu/webapp-demo.zip"
 }
 
