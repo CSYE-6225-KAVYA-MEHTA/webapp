@@ -32,11 +32,17 @@ jobs:
           name: webapp zip creation
           path: webapp-demo.zip
 
+      # - name: Move Zip file to Packer Folder
+      #   run: |
+      #     ls
+      #     pwd
+      #     sudo mv /home/runner/work/webapp/webapp/webapp-demo.zip /home/runner/work/webapp/webapp/packer/
+
       - name: Move Zip file to Packer Folder
         run: |
-          ls
-          pwd
-          sudo mv /home/runner/work/webapp/webapp/webapp-demo.zip /home/runner/work/webapp/webapp/packer/
+          mkdir -p /home/runner/work/webapp/webapp/packer/
+          ls -al /home/runner/work/webapp/webapp/
+          mv /home/runner/work/webapp/webapp/webapp-demo.zip /home/runner/work/webapp/webapp/packer/
 
       - name: Run Packer
         run: |
