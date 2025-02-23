@@ -2,12 +2,12 @@ name: Packer Build CI
 
 on:
   push:
-    branches: ["main"] # ✅ Runs only when a PR is merged into main
+    branches: ["main"]
 
 jobs:
   build:
     name: packer-build
-    runs-on: ubuntu-latest # ✅ No dependencies, so GitHub allows this job
+    runs-on: ubuntu-latest
 
     env:
       MYSQL_USERNAME: ${{ secrets.DB_USERNAME }}
