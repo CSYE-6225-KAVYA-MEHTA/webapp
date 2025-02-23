@@ -44,48 +44,19 @@ jobs:
           ls -al /home/runner/work/webapp/webapp/
           mv /home/runner/work/webapp/webapp/webapp-demo.zip /home/runner/work/webapp/webapp/packer/
 
-      - name: Install Packer
-        run: |
-          # Ensure the old Packer installation is fully removed
-          if [ -d "/usr/local/bin/packer" ]; then
-            echo "Removing old Packer directory..."
-            sudo rm -rf /usr/local/bin/packer
-          elif [ -f "/usr/local/bin/packer" ]; then
-            echo "Removing old Packer binary..."
-            sudo rm -f /usr/local/bin/packer
-          fi
-
-          # Create a temporary directory for Packer extraction
-          mkdir -p /tmp/packer-install
-          cd /tmp/packer-install
-
-          # Download and extract Packer
-          curl -fsSL -o packer.zip https://releases.hashicorp.com/packer/1.7.3/packer_1.7.3_linux_amd64.zip
-          unzip -o packer.zip || (echo "Packer extraction failed!" && exit 1)
-
-          # Ensure the binary is executable
-          chmod +x packer
-
-          # Move the new Packer binary to the correct location
-          sudo mv -f packer /usr/local/bin/packer
-
-          # Verify installation
-          packer --version
-
-          # Cleanup
-          cd ~
-          rm -rf /tmp/packer-install
-
       - name: Run Packer
         run: |
           # Install Packer
-          curl -fsSL https://releases.hashicorp.com/packer/1.7.3/packer_1.7.3_linux_amd64.zip -o packer.zip
-          unzip packer.zip
+          sudo apt-get update
+          sudo apt-get install -y unzip
+          curl -LO https://releases.hashicorp.com/packer/1.7.3/packer_1.7.3_linux_amd64.zip
+          unzip packer_1.7.3_linux_amd64.zip
           sudo mv packer /usr/local/bin/
-          ls
-          pwd
-          cd packer_folder
+          packer --version
+
           packer init img-creation.pkr.hcl
+
+          packer validate img-creation.pkr.hcl
 
           packer build
               -var "aws_region=${{ secrets.AWS_REGION }}" \
