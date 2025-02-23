@@ -2,13 +2,12 @@ name: Packer Build CI
 
 on:
   push:
-    branches: ["main"] # ✅ Runs only when a PR is merged into main
+    branches: ["main"]
 
 jobs:
   build:
     name: packer-build
     runs-on: ubuntu-latest
-    needs: validate # ✅ Ensures validate job runs first
 
     env:
       MYSQL_USERNAME: ${{ secrets.DB_USERNAME }}
@@ -81,8 +80,8 @@ jobs:
             -var "source_ami=${{ env.SOURCE_AMI }}" \
             -var "dev_user=${{ env.DEV_USER }}" \
             -var "demo_user=${{ env.DEMO_USER }}" \
-            -var "access_key=${{ env.AWS_ACCESS_KEY }}" \
-            -var "secret_key=${{ env.AWS_SECRET_ACCESS_KEY }}" \
+            -var "aws_access_key=${{ env.AWS_ACCESS_KEY }}" \
+            -var "aws_secret_access_key=${{ env.AWS_SECRET_ACCESS_KEY }}" \
             -var "security_group_id=${{ env.SECURITY_GROUP_ID }}" \
             -var "vpc_id=${{ env.VPC_ID }}" \
             webapp.pkr.hcl
