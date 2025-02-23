@@ -1,70 +1,50 @@
-name: Packer Build CI
+name: Packer AWS Build
 
 on:
-  pull_request:
+  push:
     branches:
       - main
 
 jobs:
   build:
-    name: packer-build
+    name: Build Packer Image on AWS
     runs-on: ubuntu-latest
-
-    env:
-      MYSQL_USERNAME: ${{ secrets.DB_USERNAME }}
-      MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
+    needs: validate
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Create Zip File
+      - name: Install AWS CLI
         run: |
-          zip -r webapp-demo.zip .
-
-      - name: List Files
-        run: ls -al
-
-      - name: Upload Zip File
-        uses: actions/upload-artifact@v4
-        with:
-          name: webapp zip creation
-          path: webapp-demo.zip
-
-      # - name: Move Zip file to Packer Folder
-      #   run: |
-      #     ls
-      #     pwd
-      #     sudo mv /home/runner/work/webapp/webapp/webapp-demo.zip /home/runner/work/webapp/webapp/packer/
-
-      - name: Move Zip file to Packer Folder
-        run: |
-          mkdir -p /home/runner/work/webapp/webapp/packer/
-          ls -al /home/runner/work/webapp/webapp/
-          mv /home/runner/work/webapp/webapp/webapp-demo.zip /home/runner/work/webapp/webapp/packer/
-
-      - name: Run Packer
-        run: |
-          # Install Packer
           sudo apt-get update
-          sudo apt-get install -y unzip
-          curl -LO https://releases.hashicorp.com/packer/1.7.3/packer_1.7.3_linux_amd64.zip
-          unzip packer_1.7.3_linux_amd64.zip
-          sudo mv packer /usr/local/bin/
-          packer --version
+          sudo apt-get install -y awscli
+          aws --version
 
-          packer init img-creation.pkr.hcl
+      - name: Configure AWS CLI
+        run: |
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+          echo "[default]" > ~/.aws/config
+          echo "region=${{ secrets.AWS_REGION }}" >> ~/.aws/config
 
-          packer validate img-creation.pkr.hcl
+      - name: Install Packer
+        uses: hashicorp/setup-packer@v2
 
-          packer build
+      - name: Initialize Packer
+        run: packer init img-creation.pkr.hcl
+
+      - name: Build AWS Packer Image
+        run: |
+          packer build \
               -var "aws_region=${{ secrets.AWS_REGION }}" \
               -var "subnet_id=${{ secrets.SUBNET_ID }}" \
               -var "source_ami=${{ secrets.SOURCE_AMI }}" \
               -var "dev_user=${{ secrets.DEV_USER }}" \
               -var "demo_user=${{ secrets.DEMO_USER }}" \
-              -var "aws_access_key=${{ secrets.AWS_ACCESS_KEY }}" \
+              -var "aws_access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" \
               -var "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
               -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
               -var "db_username=${{ secrets.DB_USERNAME }}" \

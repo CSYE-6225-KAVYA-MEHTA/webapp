@@ -1,0 +1,51 @@
+name: Packer AWS Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    name: Validate Packer Configuration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+          aws --version
+
+      - name: Configure AWS CLI
+        run: |
+          mkdir -p ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+          echo "[default]" > ~/.aws/config
+          echo "region=${{ secrets.AWS_REGION }}" >> ~/.aws/config
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@v2
+
+      - name: Check Packer Formatting
+        run: packer fmt -check -diff .
+
+      - name: Validate Packer Template
+        run: packer validate \
+          -var "aws_region=${{ secrets.AWS_REGION }}" \
+          -var "subnet_id=${{ secrets.SUBNET_ID }}" \
+          -var "source_ami=${{ secrets.SOURCE_AMI }}" \
+          -var "dev_user=${{ secrets.DEV_USER }}" \
+          -var "demo_user=${{ secrets.DEMO_USER }}" \
+          -var "aws_access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" \
+          -var "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+          -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
+          -var "db_username=${{ secrets.DB_USERNAME }}" \
+          -var "db_password=${{ secrets.DB_PASSWORD }}" \
+          -var "db_database=${{ secrets.DB_DATABASE }}" \
+          img-creation.pkr.hcl
