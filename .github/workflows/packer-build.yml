@@ -1,0 +1,51 @@
+name: Packer AWS Build
+
+on:
+  push:
+    branches:
+      - main # ✅ Runs only when a PR is merged into main
+
+jobs:
+  build:
+    name: Build Packer Image on AWS
+    runs-on: ubuntu-latest
+    needs: validate # ✅ Ensures validate job runs first
+
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      SUBNET_ID: ${{ secrets.SUBNET_ID }}
+      SOURCE_AMI: ${{ secrets.SOURCE_AMI }}
+      DEV_USER: ${{ secrets.DEV_USER }}
+      DEMO_USER: ${{ secrets.DEMO_USER }}
+      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_DATABASE: ${{ secrets.DB_DATABASE }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@v2
+
+      - name: Initialize Packer
+        run: packer init img-creation.pkr.hcl
+
+      - name: Build AWS Packer Image
+        run: |
+          packer build \
+              -var "aws_region=$AWS_REGION" \
+              -var "subnet_id=$SUBNET_ID" \
+              -var "source_ami=$SOURCE_AMI" \
+              -var "dev_user=$DEV_USER" \
+              -var "demo_user=$DEMO_USER" \
+              -var "aws_access_key=$AWS_ACCESS_KEY" \
+              -var "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" \
+              -var "security_group_id=$SECURITY_GROUP_ID" \
+              -var "db_username=$DB_USERNAME" \
+              -var "db_password=$DB_PASSWORD" \
+              -var "db_database=$DB_DATABASE" \
+              img-creation.pkr.hcl

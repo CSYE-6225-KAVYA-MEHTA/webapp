@@ -1,0 +1,62 @@
+name: Packer AWS Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    name: Validate Packer Configuration
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      SUBNET_ID: ${{ secrets.SUBNET_ID }}
+      SOURCE_AMI: ${{ secrets.SOURCE_AMI }}
+      DEV_USER: ${{ secrets.DEV_USER }}
+      DEMO_USER: ${{ secrets.DEMO_USER }}
+      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_DATABASE: ${{ secrets.DB_DATABASE }}
+      VPC_ID: ${{ secrets.VPC_ID }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Ensure `setup.sh` Exists in `scripts/` Folder
+        run: |
+          if [ ! -f scripts/setup.sh ]; then
+            echo "Error: scripts/setup.sh file is missing!"
+            exit 1
+          fi
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@v2
+
+      - name: Initialize Packer (Install Plugins)
+        run: packer init .
+
+      - name: Format Packer Template
+        run: packer fmt -recursive .
+
+      - name: Validate Packer Template
+        run: |
+          packer validate \
+          -var "aws_region=${{ env.AWS_REGION }}" \
+          -var "subnet_id=${{ env.SUBNET_ID }}" \
+          -var "source_ami=${{ env.SOURCE_AMI }}" \
+          -var "dev_user=${{ env.DEV_USER }}" \
+          -var "demo_user=${{ env.DEMO_USER }}" \
+          -var "access_key=${{ env.AWS_ACCESS_KEY }}" \
+          -var "secret_key=${{ env.AWS_SECRET_ACCESS_KEY }}" \
+          -var "security_group_id=${{ env.SECURITY_GROUP_ID }}" \
+          -var "db_username=${{ env.DB_USERNAME }}" \
+          -var "db_password=${{ env.DB_PASSWORD }}" \
+          -var "db_database=${{ env.DB_DATABASE }}" \
+          -var "vpc_id=${{ env.VPC_ID }}" \
+          img-creation.pkr.hcl
