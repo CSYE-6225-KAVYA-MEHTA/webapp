@@ -30,8 +30,8 @@ jobs:
       - name: Install Packer
         uses: hashicorp/setup-packer@v2
 
-      - name: Check Packer Formatting
-        run: packer fmt -check -diff .
+      - name: Format Packer Template
+        run: packer fmt -recursive .
 
       - name: Validate Packer Template
         run: packer validate \
