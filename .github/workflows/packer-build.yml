@@ -85,7 +85,7 @@ jobs:
             -var "aws_secret_access_key=${{ env.AWS_SECRET_ACCESS_KEY }}" \
             -var "security_group_id=${{ env.SECURITY_GROUP_ID }}" \
             -var "vpc_id=${{ env.VPC_ID }}" \
-            webapp.pkr.hcl
+            img-creation.pkr.hcl
 
       - name: Verify AMI Creation
         run: |
