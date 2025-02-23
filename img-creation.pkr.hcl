@@ -8,8 +8,9 @@ packer {
 }
 
 variable "aws_region" {
-  type    = string
+  default = env("AWS_REGION")
 }
+
 
 variable "ami_name" {
   type    = string
@@ -23,11 +24,13 @@ variable "instance_type" {
 
 variable "access_key" {
   type    = string
+  default = env("AWS_ACCESS_KEY_ID")
   sensitive = true
 }
 
 variable "secret_key" {
   type    = string
+  default = env("AWS_SECRET_ACCESS_KEY")
   sensitive = true
 }
 
@@ -35,8 +38,9 @@ variable "source_ami" {
   type    = string
 }
 
-variable "security_group_id" {
-  type    = string
+variable "security_group_id"{
+  type=string
+  default="sg-02578332a57774942"
 }
 
 variable "ssh_username" {
@@ -46,10 +50,12 @@ variable "ssh_username" {
 
 variable "subnet_id" {
   type    = string
+  default = "subnet-08d27cf78fa1b9164"
 }
 
 variable "vpc_id" {
   type    = string
+  default = "vpc-047cf1baaf97b19cc"
 }
 
 variable "dev_user" {
@@ -128,11 +134,11 @@ build {
 
   provisioner "shell" {
     inline = [
-      "export DB_DATABASE=${var.db_database}",
-      "export DB_USERNAME=${var.db_username}",
-      "export DB_PASSWORD=${var.db_password}",
-      "export DB_HOST=${var.db_host}",
-      "export PORT=${var.port}",
+      "export DB_DATABASE=${var.DB_DATABASE}",
+      "export DB_USERNAME=${var.DB_USERNAME}",
+      "export DB_PASSWORD=${var.DB_PASSWORD}",
+      "export DB_HOST=${var.DB_HOST}",
+      "export PORT=${var.PORT}",
       "sudo chmod +x /home/ubuntu/setup.sh",
       "sudo /home/ubuntu/setup.sh localhost"
     ]
