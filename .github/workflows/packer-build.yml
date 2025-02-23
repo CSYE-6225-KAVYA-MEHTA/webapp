@@ -23,6 +23,13 @@ jobs:
         run: |
           zip -r webapp-demo.zip .
 
+      - name: Install Packer
+        run: |
+          curl -fsSL -o packer.zip https://releases.hashicorp.com/packer/1.7.3/packer_1.7.3_linux_amd64.zip
+          unzip -o packer.zip || (echo "Packer extraction failed!" && exit 1)
+          sudo mv -f packer /usr/local/bin/
+          packer --version
+
       - name: List Files
         run: ls -al
 
