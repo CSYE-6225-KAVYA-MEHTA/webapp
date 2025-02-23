@@ -2,7 +2,7 @@ name: Packer Build CI
 
 on:
   push:
-    branches: ["A04-01"]
+    branches: main
   # pull_request:
   #   branches: ["main"]
 
@@ -63,4 +63,3 @@ jobs:
               -var "db_password=${{ secrets.DB_PASSWORD }}" \
               -var "db_database=${{ secrets.DB_DATABASE }}" \
               img-creation.pkr.hcl
-  
