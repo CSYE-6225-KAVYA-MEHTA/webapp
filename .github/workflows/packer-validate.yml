@@ -22,17 +22,24 @@ jobs:
       DB_USERNAME: ${{ secrets.DB_USERNAME }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       DB_DATABASE: ${{ secrets.DB_DATABASE }}
+      VPC_ID: ${{ secrets.VPC_ID }}
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Ensure `setup.sh` Exists
+        run: |
+          if [ ! -f setup.sh ]; then
+            echo "Error: setup.sh file is missing!"
+            exit 1
+          fi
+
       - name: Install Packer
         uses: hashicorp/setup-packer@v2
 
-      - name: Packer init
-        run: |
-          packer init img-creation.pkr.hcl
+      - name: Initialize Packer (Install Plugins)
+        run: packer init .
 
       - name: Format Packer Template
         run: packer fmt -recursive .
@@ -51,4 +58,5 @@ jobs:
           -var "db_username=${{ env.DB_USERNAME }}" \
           -var "db_password=${{ env.DB_PASSWORD }}" \
           -var "db_database=${{ env.DB_DATABASE }}" \
+          -var "vpc_id=${{ env.VPC_ID }}" \
           img-creation.pkr.hcl

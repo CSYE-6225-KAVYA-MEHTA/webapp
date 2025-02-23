@@ -128,21 +128,22 @@ build {
   sources = ["source.amazon-ebs.ubuntu"]
 
   provisioner "file" {
-    source      = "setup.sh"
+    source      = "/scripts/setup.sh"
     destination = "/home/ubuntu/setup.sh"
   }
 
-  provisioner "shell" {
+    provisioner "shell" {
     inline = [
-      "export DB_DATABASE=${var.DB_DATABASE}",
-      "export DB_USERNAME=${var.DB_USERNAME}",
-      "export DB_PASSWORD=${var.DB_PASSWORD}",
-      "export DB_HOST=${var.DB_HOST}",
-      "export PORT=${var.PORT}",
+      "export DB_DATABASE=${var.db_database}",
+      "export DB_USERNAME=${var.db_username}",
+      "export DB_PASSWORD=${var.db_password}",
+      "export DB_HOST=${var.db_host}",
+      "export PORT=${var.port}",
       "sudo chmod +x /home/ubuntu/setup.sh",
       "sudo /home/ubuntu/setup.sh localhost"
     ]
   }
+
 
   provisioner "shell" {
     inline = [
