@@ -2,7 +2,7 @@ name: Packer Build CI
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main"] #
 
 jobs:
   build:
@@ -50,7 +50,7 @@ jobs:
         run: ls -al
 
       - name: Upload Zip File as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: webapp zip creation
           path: webapp.zip
