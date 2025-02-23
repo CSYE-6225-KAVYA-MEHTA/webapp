@@ -30,6 +30,10 @@ jobs:
       - name: Install Packer
         uses: hashicorp/setup-packer@v2
 
+      - name: Packer init
+        run: |
+          packer init img-creation.pkr.hcl
+
       - name: Format Packer Template
         run: packer fmt -recursive .
 
