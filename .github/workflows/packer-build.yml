@@ -3,7 +3,7 @@ name: Packer AWS Build
 on:
   push:
     branches:
-      - main # ✅ Runs only when a PR is merged into main
+      - main
 
 jobs:
   validate:
