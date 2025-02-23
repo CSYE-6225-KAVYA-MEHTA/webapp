@@ -51,7 +51,7 @@ sudo chmod -R 750 /opt/csye6225
 echo "Setup complete! The application is now installed in /opt/csye6225."
 
 echo "-------Installing Node.js Project Dependencies-------"
-cd /opt/csye6225/webapp || exit 1
+cd /opt/csye6225/Kavya_Mehta_002312158_02 || exit 1
 npm install --unsafe-perm
 
 echo "-------Starting the Application-------"
