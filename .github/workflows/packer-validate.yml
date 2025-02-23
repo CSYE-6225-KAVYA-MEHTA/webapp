@@ -28,10 +28,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Ensure `setup.sh` Exists
+      - name: Ensure `setup.sh` Exists in `scripts/` Folder
         run: |
-          if [ ! -f setup.sh ]; then
-            echo "Error: setup.sh file is missing!"
+          if [ ! -f scripts/setup.sh ]; then
+            echo "Error: scripts/setup.sh file is missing!"
             exit 1
           fi
 
