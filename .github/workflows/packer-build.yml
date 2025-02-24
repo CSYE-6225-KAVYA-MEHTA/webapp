@@ -1,4 +1,4 @@
-name: Packer Build CI
+name: Packer Build
 
 on:
   push:
@@ -30,27 +30,27 @@ jobs:
       - name: Install Packer
         uses: hashicorp/setup-packer@v2
         with:
-          version: "1.9.4" # Using a more recent version
+          version: "1.9.4"
 
-      - name: Debug Directory Structure
+      - name: Debug Directory Structure Before
         run: |
-          echo "Current directory:"
-          pwd
-          echo "Directory contents:"
+          echo "Current directory structure:"
           ls -R
-          echo "Packer directory contents:"
-          ls -la packer/
 
       - name: Create Zip File
         run: |
-          zip -r webapp.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*"
+          # Create zip excluding the packer directory and other unnecessary files
+          zip -r webapp.zip . -x "packer/*" "*.git*" "*node_modules*" "*logs*" "*temp*"
 
-      - name: Create Packer Directory and Move Files
+      - name: Move Files to Packer Directory
         run: |
-          mkdir -p packer
+          # Move the zip file to packer directory
           mv webapp.zip packer/
-          cp img-creation.pkr.hcl packer/
-          cp -r scripts packer/
+
+      - name: Debug Directory Structure After
+        run: |
+          echo "Final directory structure:"
+          ls -R
 
       - name: Initialize Packer
         working-directory: ./packer
