@@ -47,6 +47,11 @@ jobs:
         with:
           version: "1.9.4"
 
+      - name: Setting up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.x"
+
       - name: Debug Directory Structure Before
         run: |
           echo "Current directory structure:"
