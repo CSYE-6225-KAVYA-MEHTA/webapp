@@ -27,75 +27,119 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Install AWS CLI (Official Installer)
-        run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
-          aws --version
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
 
-      - name: Configure AWS CLI for DEV Profile
+      - name: Install Dependencies
         run: |
-          mkdir -p ~/.aws
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
-          echo "[default]" > ~/.aws/config
-          echo "region=${{ secrets.AWS_REGION }}" >> ~/.aws/config
+          npm install
 
-      - name: Verify `img-creation.pkr.hcl` Exists
+      - name: Run Integration Tests
         run: |
-          if [ ! -f img-creation.pkr.hcl ]; then
-            echo "Error: img-creation.pkr.hcl not found!"
-            exit 1
-          fi
+          npm test || exit 1
 
-      - name: Move Packer Configuration to `packer` Directory
+      - name: Create systemd Service File
+        run: |
+          cat << EOF > webapp.service
+          [Unit]
+          Description=Node.js Web Application
+          After=network.target
+
+          [Service]
+          Type=simple
+          User=csye6225
+          Group=csye6225
+          WorkingDirectory=/opt/csye6225/webapp
+          ExecStart=/usr/bin/node app.js
+          Restart=always
+          Environment=NODE_ENV=production
+          Environment=DB_HOST=${DB_HOST}
+          Environment=DB_USER=${DB_USERNAME}
+          Environment=DB_PASSWORD=${DB_PASSWORD}
+          Environment=DB_NAME=${DB_DATABASE}
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
+      - name: Create Application Zip
+        run: |
+          zip -r webapp.zip . \
+            --exclude ".git/*" \
+            --exclude "node_modules/*" \
+            --exclude "test/*"
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@v2
+
+      - name: Move Files to Packer Directory
         run: |
           mkdir -p packer
           mv img-creation.pkr.hcl packer/
+          mv webapp-demo.zip packer/
+          mv webapp.service packer/
+          mv scripts/setup.sh packer/
 
-      - name: Create Zip File of WebApp
+      - name: Update setup.sh
         run: |
-          zip -r webapp.zip .
+          cat << 'EOF' > packer/setup.sh
+          #!/bin/bash
+          set -e
 
-      - name: List Files
-        run: ls -al
-
-      - name: Upload Zip File as Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: webapp zip creation
-          path: webapp.zip
-
-      - name: Move Zip File to Packer Folder
-        run: |
-          mv webapp.zip packer/
-
-      - name: Install System Dependencies (MySQL, unzip, etc.)
-        run: |
+          # System updates and dependencies
           sudo apt-get update
-          sudo apt-get install -y mysql-server unzip
+          sudo apt-get upgrade -y
+          sudo apt-get install -y nodejs npm mysql-server unzip
 
-      - name: Start MySQL Service
-        run: |
+          # Create user and group
+          sudo groupadd csye6225 || echo "Group exists"
+          sudo useradd -r -s /usr/sbin/nologin -g csye6225 csye6225 || echo "User exists"
+
+          # Setup application directory
+          sudo mkdir -p /opt/csye6225
+          sudo unzip webapp.zip -d /opt/csye6225/webapp
+
+          # Setup service
+          sudo mv webapp.service /etc/systemd/system/
+          sudo chown -R csye6225:csye6225 /opt/csye6225
+          sudo chmod -R 750 /opt/csye6225
+
+          # Configure MySQL
           sudo systemctl start mysql
           sudo systemctl enable mysql
-          mysql --version
+          sudo mysql -e "CREATE DATABASE IF NOT EXISTS ${DB_DATABASE};"
+          sudo mysql -e "CREATE USER IF NOT EXISTS '${DB_USERNAME}'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';"
+          sudo mysql -e "GRANT ALL PRIVILEGES ON ${DB_DATABASE}.* TO '${DB_USERNAME}'@'localhost';"
+          sudo mysql -e "FLUSH PRIVILEGES;"
+
+          # Setup application
+          cd /opt/csye6225/webapp
+          sudo -u csye6225 npm install --production
+
+          # Configure systemd
+          sudo systemctl daemon-reload
+          sudo systemctl enable webapp
+          EOF
 
       - name: Run Packer Build
         run: |
           cd packer
+          packer init .
           packer build \
-            -var "aws_region=${{ env.AWS_REGION }}" \
-            -var "subnet_id=${{ env.SUBNET_ID }}" \
-            -var "source_ami=${{ env.SOURCE_AMI }}" \
-            -var "dev_user=${{ env.DEV_USER }}" \
-            -var "demo_user=${{ env.DEMO_USER }}" \
-            -var "aws_access_key=${{ env.AWS_ACCESS_KEY }}" \
-            -var "aws_secret_access_key=${{ env.AWS_SECRET_ACCESS_KEY }}" \
-            -var "security_group_id=${{ env.SECURITY_GROUP_ID }}" \
-            -var "vpc_id=${{ env.VPC_ID }}" \
+            -var "aws_region=${AWS_REGION}" \
+            -var "subnet_id=${SUBNET_ID}" \
+            -var "source_ami=${SOURCE_AMI}" \
+            -var "dev_user=${DEV_USER}" \
+            -var "demo_user=${DEMO_USER}" \
+            -var "access_key=${AWS_ACCESS_KEY}" \
+            -var "secret_key=${AWS_SECRET_ACCESS_KEY}" \
+            -var "security_group_id=${SECURITY_GROUP_ID}" \
+            -var "vpc_id=${VPC_ID}" \
+            -var "db_username=${MYSQL_USERNAME}" \
+            -var "db_password=${MYSQL_ROOT_PASSWORD}" \
+            -var "db_database=${MYSQL_DATABASE}" \
             img-creation.pkr.hcl
 
       - name: Verify AMI Creation

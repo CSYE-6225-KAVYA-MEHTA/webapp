@@ -31,9 +31,25 @@ jobs:
       - name: Ensure `setup.sh` Exists in `scripts/` Folder
         run: |
           if [ ! -f scripts/setup.sh ]; then
-            echo "Error: scripts/setup.sh file is missing!"
+            echo "ERROR: scripts/setup.sh file is missing!"
             exit 1
           fi
+
+      - name: Install Zip Utility
+        run: |
+          sudo apt-get install -y zip
+
+      - name: Create WebApp Zip File
+        run: |
+          zip -r webapp-demo.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*"
+
+      - name: Debug - Check WebApp Zip File
+        run: |
+          if [ ! -f webapp-demo.zip ]; then
+            echo "ERROR: webapp-demo.zip file is missing!"
+            exit 1
+          fi
+          ls -al
 
       - name: Install Packer
         uses: hashicorp/setup-packer@v2

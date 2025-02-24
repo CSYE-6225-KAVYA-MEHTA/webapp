@@ -2,7 +2,7 @@ packer {
   required_plugins {
     amazon = {
       version = ">= 1.0.0, < 2.0.0"
-      source  = "github.com/hashicorp/amazon"
+      source  = "github.com/hashicorp/amazon" #
     }
   }
 }
@@ -14,7 +14,7 @@ variable "aws_region" {
 
 variable "ami_name" {
   type    = string
-  default = "CSYE6225"
+  default = "CSYE-6225"
 }
 
 variable "instance_type" {
@@ -23,24 +23,25 @@ variable "instance_type" {
 }
 
 variable "access_key" {
-  type    = string
-  default = env("AWS_ACCESS_KEY_ID")
+  type      = string
+  default   = env("AWS_ACCESS_KEY_ID")
   sensitive = true
 }
 
 variable "secret_key" {
-  type    = string
-  default = env("AWS_SECRET_ACCESS_KEY")
+  type      = string
+  default   = env("AWS_SECRET_ACCESS_KEY")
   sensitive = true
 }
 
 variable "source_ami" {
   type    = string
+  default = "ami-04b4f1a9cf54c11d0"
 }
 
-variable "security_group_id"{
-  type=string
-  default="sg-02578332a57774942"
+variable "security_group_id" {
+  type    = string
+  default = "sg-02578332a57774942"
 }
 
 variable "ssh_username" {
@@ -60,10 +61,12 @@ variable "vpc_id" {
 
 variable "dev_user" {
   type    = string
+  default = "248189920505"
 }
 
 variable "demo_user" {
   type    = string
+  default = "699475940666"
 }
 
 locals {
@@ -78,31 +81,34 @@ variable "volume_size" {
 variable "db_username" {
   type      = string
   sensitive = true
+  default   = env("DB_USERNAME")
 }
 
 variable "db_password" {
   type      = string
   sensitive = true
+  default   = env("DB_PASSWORD")
 }
 
 variable "db_database" {
   type      = string
   sensitive = true
+  default   = env("DB_DATABASE")
 }
 
 variable "db_host" {
   type    = string
-  default = "localhost"
+  default = env("DB_HOST")
 }
 
 variable "port" {
   type    = string
-  default = "8080"
+  default = env("PORT")
 }
 
 source "amazon-ebs" "ubuntu" {
   ami_name          = "${var.ami_name}-${local.timestamp}"
-  ami_description   = "AMI for CSYE6225 A04"
+  ami_description   = "AMI for CSYE6225 A04 KAVYA MEHTA"
   ami_regions       = ["us-east-1"]
   ami_users         = [var.dev_user]
   instance_type     = var.instance_type
@@ -127,29 +133,50 @@ source "amazon-ebs" "ubuntu" {
 build {
   sources = ["source.amazon-ebs.ubuntu"]
 
-    provisioner "file" {
-    source      = "${path.cwd}/scripts/setup.sh"
+
+provisioner "file" {
+  source      = "webapp-demo.zip"  
+  destination = "/home/ubuntu/webapp-demo.zip"
+}
+
+  provisioner "file" {
+    source = "scripts/setup.sh"
+
     destination = "/home/ubuntu/setup.sh"
   }
 
 
-    provisioner "shell" {
-    inline = [
-      "export DB_DATABASE=${var.db_database}",
-      "export DB_USERNAME=${var.db_username}",
-      "export DB_PASSWORD=${var.db_password}",
-      "export DB_HOST=${var.db_host}",
-      "export PORT=${var.port}",
-      "sudo chmod +x /home/ubuntu/setup.sh",
-      "sudo /home/ubuntu/setup.sh localhost"
-    ]
-  }
+  # provisioner "shell" {
+  #   inline = [
+  #     "export DB_DATABASE=${var.db_database}",
+  #     "export DB_USERNAME=${var.db_username}",
+  #     "export DB_PASSWORD=${var.db_password}",
+  #     "export DB_HOST=${var.db_host}",
+  #     "export PORT=${var.port}",
+  #     "sudo chmod +x /home/ubuntu/setup.sh",
+  #     "sudo /home/ubuntu/setup.sh localhost"
+  #   ]
+  # }
 
+  provisioner "shell" {
+  execute_command = "bash -c '{{ .Vars }} {{ .Path }}'"  # Explicitly use bash
+  inline = [
+    "set -eux", # Remove pipefail but keep other useful options
+    "export DB_DATABASE=${var.db_database}",
+    "export DB_USERNAME=${var.db_username}",
+    "export DB_PASSWORD=${var.db_password}",
+    "export DB_HOST=${var.db_host}",
+    "export PORT=${var.port}",
+    "sudo chmod +x /home/ubuntu/setup.sh",
+    "sudo /home/ubuntu/setup.sh localhost"
+  ]
+}
 
   provisioner "shell" {
     inline = [
       "sudo apt-get update",
       "sudo apt-get install -y mysql-server",
+      "sudo systemctl daemon-reload",
       "sudo systemctl enable mysql",
       "sudo systemctl start mysql"
     ]
