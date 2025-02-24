@@ -102,18 +102,18 @@ jobs:
         working-directory: ./packer
         run: |
           cat > variables.pkrvars.hcl <<EOF
-          aws_region = "${{ secrets.AWS_REGION }}"\
-          access_key = "${{ secrets.AWS_ACCESS_KEY_ID }}"\
-          secret_key = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"\
-          subnet_id = "${{ secrets.SUBNET_ID }}"\
-          source_ami = "${{ secrets.SOURCE_AMI }}"\
-          dev_user = "${{ secrets.DEV_USER }}"\
-          demo_user = "${{ secrets.DEMO_USER }}"\
-          security_group_id = "${{ secrets.SECURITY_GROUP_ID }}"\
-          vpc_id = "${{ secrets.VPC_ID }}"\
-          db_username = "${{ secrets.DB_USERNAME }}"\
-          db_password = "${{ secrets.DB_PASSWORD }}"\
-          db_database = "${{ secrets.DB_DATABASE }}"\
+          aws_region = "${{ secrets.AWS_REGION }}"
+          access_key = "${{ secrets.AWS_ACCESS_KEY_ID }}"
+          secret_key = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          subnet_id = "${{ secrets.SUBNET_ID }}"
+          source_ami = "${{ secrets.SOURCE_AMI }}"
+          dev_user = "${{ secrets.DEV_USER }}"
+          demo_user = "${{ secrets.DEMO_USER }}"
+          security_group_id = "${{ secrets.SECURITY_GROUP_ID }}"
+          vpc_id = "${{ secrets.VPC_ID }}"
+          db_username = "${{ secrets.DB_USERNAME }}"
+          db_password = "${{ secrets.DB_PASSWORD }}"
+          db_database = "${{ secrets.DB_DATABASE }}"
           EOF
 
       - name: Configure AWS Credentials
