@@ -23,16 +23,13 @@ variable "instance_type" {
 }
 
 variable "access_key" {
-  type      = string
-  default   = env("AWS_ACCESS_KEY_ID")
-  sensitive = true
+  type = string
 }
 
 variable "secret_key" {
-  type      = string
-  default   = env("AWS_SECRET_ACCESS_KEY")
-  sensitive = true
+  type = string
 }
+
 
 variable "source_ami" {
   type    = string
