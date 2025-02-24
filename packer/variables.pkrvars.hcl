@@ -1,5 +1,5 @@
-aws_access_key    = "AKIATTSKFUT4WED7UN7V"
-aws_secret_access_key = "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"
+aws_access_key="AKIATTSKFUT4WED7UN7V"
+aws_secret_key="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"
 aws_region        = "us-east-1"
 subnet_id         = "subnet-08d27cf78fa1b9164"
 source_ami        = "ami-04b4f1a9cf54c11d0"

@@ -140,8 +140,8 @@ build {
     "export DB_PASSWORD=${var.db_password}",
     "export DB_HOST=${var.db_host}",
     "export PORT=${var.port}",
-    "sudo chmod +x /home/ubuntu/setup.sh",
-    "sudo /home/ubuntu/setup.sh localhost"
+    # "sudo chmod +x /home/ubuntu/setup.sh",
+    # "sudo /home/ubuntu/setup.sh localhost"
   ]
 }
 

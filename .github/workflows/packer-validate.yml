@@ -66,6 +66,7 @@ jobs:
           packer init .
           packer fmt -recursive .
           packer validate \
+          -var file=variables.pkrvars.hcl \
           -var "aws_region=${{ secrets.AWS_REGION }}" \
           -var "subnet_id=${{ secrets.SUBNET_ID }}" \
           -var "source_ami=${{ secrets.SOURCE_AMI }}" \
