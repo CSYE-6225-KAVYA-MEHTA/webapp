@@ -148,22 +148,22 @@ build {
     ]
   }
 
-  # provisioner "shell"{
-  #   source ="scripts/setup.sh"
-  # }
+
+  
+
+  provisioner "shell" {
+    inline = [
+      "sudo apt-get update",
+      "sudo apt-get install -y mysql-server",
+      "sudo systemctl daemon-reload",
+      "sudo systemctl enable mysql",
+      "sudo systemctl start mysql"
+    ]
+  }
 
 
   provisioner "shell" {
     script = "scripts/setup.sh"
   }
-
-  # provisioner "shell" {
-  #   inline = [
-  #     "sudo apt-get update",
-  #     "sudo apt-get install -y mysql-server",
-  #     "sudo systemctl daemon-reload",
-  #     "sudo systemctl enable mysql",
-  #     "sudo systemctl start mysql"
-  #   ]
-  # }
+  
 }
