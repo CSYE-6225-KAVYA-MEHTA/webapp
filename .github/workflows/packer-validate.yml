@@ -45,7 +45,7 @@ jobs:
 
       - name: Debug - Check WebApp Zip File
         run: |
-          if [ ! -f webapp-demo.zip ]; then
+          if [ ! -f webapp.zip ]; then
             echo "ERROR: webapp.zip file is missing!"
             exit 1
           fi
