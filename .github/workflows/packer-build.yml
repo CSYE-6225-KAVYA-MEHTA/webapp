@@ -63,14 +63,30 @@ jobs:
           sudo apt-get install -y zip
 
       - name: Building webapp application artifact
-        if: success()
         run: |
-          zip -r webapp.zip .
+          zip -r webapp.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*"
 
-      - name: Move Files to Packer Directory
+      - name: Debug - Check if WebApp Zip File Exists
         run: |
-          # Move the zip file to packer directory
-          mv webapp.zip packer/
+          if [ ! -f webapp.zip ]; then
+            echo "ERROR: webapp.zip file is missing!"
+            exit 1
+          fi
+          ls -al webapp.zip
+
+      - name: Upload zip
+        uses: actions/upload-artifact@v4
+      # - name: Move Files to Packer Directory
+      #   run: |
+      #     # Move the zip file to packer directory
+      #     mv webapp.zip
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Debug Directory Structure After
         run: |

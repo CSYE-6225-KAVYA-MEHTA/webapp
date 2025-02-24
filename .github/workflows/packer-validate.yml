@@ -41,12 +41,12 @@ jobs:
 
       - name: Create WebApp Zip File
         run: |
-          zip -r webapp-demo.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*"
+          zip -r webapp.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*"
 
       - name: Debug - Check WebApp Zip File
         run: |
-          if [ ! -f webapp-demo.zip ]; then
-            echo "ERROR: webapp-demo.zip file is missing!"
+          if [ ! -f webapp.zip ]; then
+            echo "ERROR: webapp.zip file is missing!"
             exit 1
           fi
           ls -al
@@ -54,14 +54,7 @@ jobs:
       - name: Install Packer
         uses: hashicorp/setup-packer@v2
 
-      - name: Move to Packer Directory and Initialize
-        run: |
-          cd packer
-          packer init .
-          packer fmt -recursive .
-          packer validate img-creation.pkr.hcl
-
-      - name: Move to Packer Directory and Initialize
+      - name: Packer Initialize and Validate
         working-directory: ./packer
         run: |
           packer init .
