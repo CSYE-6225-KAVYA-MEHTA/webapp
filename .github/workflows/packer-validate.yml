@@ -35,9 +35,13 @@ jobs:
             exit 1
           fi
 
+      - name: Install Zip Utility
+        run: |
+          sudo apt-get install -y zip
+
       - name: Create WebApp Zip File
         run: |
-          zip -r webapp-demo.zip . || echo "ERROR: Failed to create webapp-demo.zip!" && exit 1
+          zip -r webapp-demo.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*"
 
       - name: Debug - Check WebApp Zip File
         run: |
