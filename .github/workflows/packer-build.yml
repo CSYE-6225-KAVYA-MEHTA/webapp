@@ -1,18 +1,16 @@
-name: Packer Build CI
+name: Packer AWS Validation
 
 on:
-  push:
-    branches: ["main"]
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
-    name: packer-build
+  validate:
+    name: Validate Packer Configuration
     runs-on: ubuntu-latest
 
     env:
-      MYSQL_USERNAME: ${{ secrets.DB_USERNAME }}
-      MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
       SUBNET_ID: ${{ secrets.SUBNET_ID }}
       SOURCE_AMI: ${{ secrets.SOURCE_AMI }}
@@ -21,55 +19,64 @@ jobs:
       AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_DATABASE: ${{ secrets.DB_DATABASE }}
       VPC_ID: ${{ secrets.VPC_ID }}
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Create Zip File
+      - name: Debug - List Directory Contents
         run: |
-          zip -r webapp.zip .
+          echo "Root directory contents:"
+          ls -la
+          echo "Packer directory contents (if exists):"
+          ls -la packer || echo "Packer directory not found"
 
-      - name: List Files
-        run: ls -al
+      - name: Install Packer
+        uses: hashicorp/setup-packer@v2
 
-      - name: Upload Zip File
-        uses: actions/upload-artifact@v4
-        with:
-          name: webapp zip creation
-          path: webapp.zip
-
-      - name: Move Zip file to Packer Folder
+      - name: Ensure Required Files Exist
         run: |
-          ls
-          pwd
-          sudo mv /home/runner/work/webapp/webapp/webapp.zip /home/runner/work/webapp/webapp/packer/
+          if [ ! -f packer/img-creation.pkr.hcl ]; then
+            echo "ERROR: packer/img-creation.pkr.hcl is missing!"
+            exit 1
+          fi
+          if [ ! -f scripts/setup.sh ]; then
+            echo "ERROR: scripts/setup.sh is missing!"
+            exit 1
+          fi
 
-      - name: Packer init
+      - name: Create WebApp Zip File
         run: |
-          # Install Packer
-          curl -fsSL https://releases.hashicorp.com/packer/1.7.3/packer_1.7.3_linux_amd64.zip -o packer.zip
-          packer init img-creation.pkr.hcl
+          zip -r webapp-demo.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*"
+          mv webapp-demo.zip packer/
 
-      - name: Run Packer
+      - name: Initialize and Validate Packer
+        working-directory: ./packer
         run: |
-          packer build \
+          packer init .
+          packer fmt -recursive .
+          packer validate \
             -var "aws_region=${{ env.AWS_REGION }}" \
             -var "subnet_id=${{ env.SUBNET_ID }}" \
             -var "source_ami=${{ env.SOURCE_AMI }}" \
             -var "dev_user=${{ env.DEV_USER }}" \
-            -var "demo_user=${{ env.DEMO_USER }}" \
-            -var "aws_access_key=${{ env.AWS_ACCESS_KEY }}" \
-            -var "aws_secret_access_key=${{ env.AWS_SECRET_ACCESS_KEY }}" \
+            -var "demo_user=${{ env.DEV_USER }}" \
+            -var "access_key=${{ env.AWS_ACCESS_KEY }}" \
+            -var "secret_key=${{ env.AWS_SECRET_ACCESS_KEY }}" \
             -var "security_group_id=${{ env.SECURITY_GROUP_ID }}" \
+            -var "db_username=${{ env.DB_USERNAME }}" \
+            -var "db_password=${{ env.DB_PASSWORD }}" \
+            -var "db_database=${{ env.DB_DATABASE }}" \
             -var "vpc_id=${{ env.VPC_ID }}" \
             img-creation.pkr.hcl
 
-      - name: Verify AMI Creation
-        run: |
-          aws ec2 describe-images \
-            --owners self \
-            --filters "Name=name,Values=CSYE6225*" \
-            --query 'Images[*].[ImageId,State,CreationDate]' \
-            --output table
+      - name: Validation Results Upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-results
+          path: packer/validation.log
