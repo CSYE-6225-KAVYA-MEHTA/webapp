@@ -104,14 +104,14 @@ variable "port" {
 }
 
 source "amazon-ebs" "ubuntu" {
-  ami_name          = "${var.ami_name}-${local.timestamp}"
-  ami_description   = "AMI for CSYE6225 A04 KAVYA MEHTA"
-  ami_regions       = ["us-east-1"]
-  ami_users         = [var.dev_user]
-  instance_type     = var.instance_type
-  region            = var.aws_region
-  access_key = var.aws_access_key # Reference the access key variable
-  secret_key = var.aws_secret_key # Reference the secret key variable
+  ami_name        = "${var.ami_name}-${local.timestamp}"
+  ami_description = "AMI for CSYE6225 A04 KAVYA MEHTA"
+  ami_regions     = ["us-east-1"]
+  ami_users       = [var.dev_user]
+  instance_type   = var.instance_type
+  region          = var.aws_region
+  access_key      = var.aws_access_key # Reference the access key variable
+  secret_key      = var.aws_secret_key # Reference the secret key variable
 
   source_ami        = var.source_ami
   ssh_interface     = "public_ip"
@@ -132,18 +132,18 @@ build {
   sources = ["source.amazon-ebs.ubuntu"]
 
   provisioner "shell" {
-  execute_command = "bash -c '{{ .Vars }} {{ .Path }}'"  # Explicitly use bash
-  inline = [
-    "set -eux", # Remove pipefail but keep other useful options
-    "export DB_DATABASE=${var.db_database}",
-    "export DB_USERNAME=${var.db_username}",
-    "export DB_PASSWORD=${var.db_password}",
-    "export DB_HOST=${var.db_host}",
-    "export PORT=${var.port}",
-    # "sudo chmod +x /home/ubuntu/setup.sh",
-    # "sudo /home/ubuntu/setup.sh localhost"
-  ]
-}
+    execute_command = "bash -c '{{ .Vars }} {{ .Path }}'" # Explicitly use bash
+    inline = [
+      "set -eux", # Remove pipefail but keep other useful options
+      "export DB_DATABASE=${var.db_database}",
+      "export DB_USERNAME=${var.db_username}",
+      "export DB_PASSWORD=${var.db_password}",
+      "export DB_HOST=${var.db_host}",
+      "export PORT=${var.port}",
+      # "sudo chmod +x /home/ubuntu/setup.sh",
+      # "sudo /home/ubuntu/setup.sh localhost"
+    ]
+  }
 
   provisioner "shell" {
     inline = [
