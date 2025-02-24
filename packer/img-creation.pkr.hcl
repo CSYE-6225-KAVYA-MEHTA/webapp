@@ -133,6 +133,12 @@ source "amazon-ebs" "ubuntu" {
 build {
   sources = ["source.amazon-ebs.ubuntu"]
 
+  provisioner "file" {
+  source      = "scripts/setup.sh"
+  destination = "/home/ubuntu/setup.sh"
+}
+
+
   provisioner "shell" {
     execute_command = "bash -c '{{ .Vars }} {{ .Path }}'" # Explicitly use bash
     inline = [
@@ -142,8 +148,8 @@ build {
       "export DB_PASSWORD=${var.db_password}",
       "export DB_HOST=${var.db_host}",
       "export PORT=${var.port}",
-      # "sudo chmod +x /home/ubuntu/setup.sh",
-      # "sudo /home/ubuntu/setup.sh localhost"
+      "sudo chmod +x /home/ubuntu/setup.sh",
+      "sudo /home/ubuntu/setup.sh localhost"
     ]
   }
 

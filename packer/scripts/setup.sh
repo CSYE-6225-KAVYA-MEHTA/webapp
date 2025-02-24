@@ -15,9 +15,13 @@ sudo apt install mysql-server -y
 sudo apt install -y unzip
 sudo apt install -y nodejs
 sudo apt install -y npm
+sudo apt-get install -y zip
+
 
 sudo systemctl start mysql
 sudo systemctl enable mysql
+
+
 
 echo "Creating Databse..."
 sudo mysql -e "CREATE DATABASE IF NOT EXISTS Health_Check;"
@@ -33,6 +37,10 @@ sudo sed -i 's/^bind-address\s*=.*/bind-address = 0.0.0.0/' /etc/mysql/mysql.con
 
 
 sudo systemctl restart mysql
+
+
+
+
 
 echo "Creating Linux group for the application..."
 sudo groupadd CSYE_6225_GROUP || echo "Group already exists."
