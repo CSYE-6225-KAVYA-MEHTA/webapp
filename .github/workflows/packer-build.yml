@@ -57,9 +57,8 @@ jobs:
       - name: Initialize and Validate Packer
         working-directory: ./packer
         run: |
-          packer init .
           packer fmt -recursive .
-          packer validate \
+          packer build\
             -var "aws_region=${{ env.AWS_REGION }}" \
             -var "subnet_id=${{ env.SUBNET_ID }}" \
             -var "source_ami=${{ env.SOURCE_AMI }}" \
@@ -73,10 +72,3 @@ jobs:
             -var "db_database=${{ env.DB_DATABASE }}" \
             -var "vpc_id=${{ env.VPC_ID }}" \
             img-creation.pkr.hcl
-
-      - name: Validation Results Upload
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: validation-results
-          path: packer/validation.log
