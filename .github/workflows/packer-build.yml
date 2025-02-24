@@ -67,10 +67,10 @@ jobs:
         run: |
           zip -r webapp.zip .
 
-      - name: Move Files to Packer Directory
-        run: |
-          # Move the zip file to packer directory
-          mv webapp.zip packer/
+      # - name: Move Files to Packer Directory
+      #   run: |
+      #     # Move the zip file to packer directory
+      #     mv webapp.zip 
 
       - name: Debug Directory Structure After
         run: |
