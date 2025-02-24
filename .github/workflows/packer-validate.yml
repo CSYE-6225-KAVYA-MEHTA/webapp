@@ -30,7 +30,7 @@ jobs:
 
       - name: Ensure `setup.sh` Exists in `scripts/` Folder
         run: |
-          if [ ! -f scripts/setup.sh ]; then
+          if [ ! -f packer/scripts/setup.sh ]; then
             echo "ERROR: scripts/setup.sh file is missing!"
             exit 1
           fi
