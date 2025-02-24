@@ -103,7 +103,7 @@ jobs:
         run: |
           cat > variables.pkrvars.hcl <<EOF
           aws_region = "${{ secrets.AWS_REGION }}"
-          access_key = "${{ secrets.AWS_ACCESS_KEY }}"
+          access_key = "${{ secrets.AWS_ACCESS_KEY}}"
           secret_key = "${{ secrets.AWS_SECRET_KEY }}"
           subnet_id = "${{ secrets.SUBNET_ID }}"
           source_ami = "${{ secrets.SOURCE_AMI }}"
