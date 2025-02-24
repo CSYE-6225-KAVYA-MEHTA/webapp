@@ -57,9 +57,22 @@ jobs:
       #     # Create zip excluding the packer directory and other unnecessary files
       #     zip -r webapp.zip . -x "packer/*" "*.git*" "*node_modules*" "*logs*" "*temp*"
 
+      - name: Install Zip Utility
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zip
+
       - name: Building webapp application artifact
         run: |
-          zip -r webapp.zip .
+          zip -r webapp.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*"
+
+      - name: Debug - Check if WebApp Zip File Exists
+        run: |
+          if [ ! -f webapp.zip ]; then
+            echo "ERROR: webapp.zip file is missing!"
+            exit 1
+          fi
+          ls -al webapp.zip
 
       - name: Upload zip
         uses: actions/upload-artifact@v4

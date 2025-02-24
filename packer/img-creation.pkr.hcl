@@ -23,13 +23,13 @@ variable "instance_type" {
 }
 
 variable "AWS_ACCESS_KEY" {
-  type = string
-  default=""
+  type    = string
+  default = ""
 }
 
 variable "AWS_SECRET_KEY" {
-  type = string
-  default=""
+  type    = string
+  default = ""
 }
 
 
@@ -134,19 +134,19 @@ build {
   sources = ["source.amazon-ebs.ubuntu"]
 
   provisioner "file" {
-    source      = "webapp.zip"
+    source      = "../webapp.zip"
     destination = "/tmp/webapp.zip"
   }
 
   provisioner "shell" {
-      inline = [
-        "export DB_DATABASE=${var.db_database}",
-        "export DB_USERNAME=${var.db_username}",
-        "export DB_PASSWORD=${var.db_password}",
-        "export DB_HOST=${var.db_host}",
-        "export PORT=${var.port}"
-      ]
-    }
+    inline = [
+      "export DB_DATABASE=${var.db_database}",
+      "export DB_USERNAME=${var.db_username}",
+      "export DB_PASSWORD=${var.db_password}",
+      "export DB_HOST=${var.db_host}",
+      "export PORT=${var.port}"
+    ]
+  }
 
   # provisioner "shell"{
   #   source ="scripts/setup.sh"
@@ -154,7 +154,7 @@ build {
 
 
   provisioner "shell" {
-    source ="scripts/setup.sh"
+    source = "scripts/setup.sh"
   }
 
   # provisioner "shell" {

@@ -41,12 +41,12 @@ jobs:
 
       - name: Create WebApp Zip File
         run: |
-          zip -r webapp-demo.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*"
+          zip -r webapp.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*"
 
       - name: Debug - Check WebApp Zip File
         run: |
           if [ ! -f webapp-demo.zip ]; then
-            echo "ERROR: webapp-demo.zip file is missing!"
+            echo "ERROR: webapp.zip file is missing!"
             exit 1
           fi
           ls -al
