@@ -9,20 +9,6 @@ jobs:
     name: packer-build
     runs-on: ubuntu-latest
 
-    # env:
-    #   MYSQL_USERNAME: ${{ secrets.DB_USERNAME }}
-    #   MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
-    #   MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
-    #   AWS_REGION: ${{ secrets.AWS_REGION }}
-    #   SUBNET_ID: ${{ secrets.SUBNET_ID }}
-    #   SOURCE_AMI: ${{ secrets.SOURCE_AMI }}
-    #   DEV_USER: ${{ secrets.DEV_USER }}
-    #   DEMO_USER: ${{ secrets.DEMO_USER }}
-    #   AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    #   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    #   SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
-    #   VPC_ID: ${{ secrets.VPC_ID }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
