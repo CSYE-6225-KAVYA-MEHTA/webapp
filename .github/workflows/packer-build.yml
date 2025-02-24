@@ -2,7 +2,7 @@ name: Packer Build CI
 
 on:
   push:
-    branches: ["main"]#
+    branches: ["main"]
 
 jobs:
   build:
@@ -32,26 +32,28 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y mysql-server
           sudo systemctl start mysql
-          sudo systemctl enable mysql
-          
-          # Ensure MySQL root user can connect
-          sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${{ secrets.MYSQL_ROOT_PASSWORD }}'; FLUSH PRIVILEGES;"
-          
-          # Wait for MySQL to fully start
-          sleep 5
 
-          # Create database and user with correct privileges
-          sudo mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "CREATE DATABASE IF NOT EXISTS ${{ secrets.DB_DATABASE }};"
-          sudo mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "CREATE USER IF NOT EXISTS '${{ secrets.DB_USERNAME }}'@'localhost' IDENTIFIED BY '${{ secrets.DB_PASSWORD }}';"
-          sudo mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "GRANT ALL PRIVILEGES ON ${{ secrets.DB_DATABASE }}.* TO '${{ secrets.DB_USERNAME }}'@'localhost';"
-          sudo mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "FLUSH PRIVILEGES;"
+          # Set root password and configure MySQL securely
+          sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ secrets.DB_PASSWORD }}';"
+          sudo mysql -e "FLUSH PRIVILEGES;"
 
+          # Create MySQL config file with credentials
+          echo "[client]
+          user=root
+          password=${{ secrets.DB_PASSWORD }}" | sudo tee ~/.my.cnf
+          sudo chmod 600 ~/.my.cnf
+
+          # Create database and user
+          mysql -e "CREATE DATABASE IF NOT EXISTS ${{ secrets.DB_DATABASE }};"
+          mysql -e "CREATE USER IF NOT EXISTS '${{ secrets.DB_USERNAME }}'@'localhost' IDENTIFIED BY '${{ secrets.DB_PASSWORD }}';"
+          mysql -e "GRANT ALL PRIVILEGES ON ${{ secrets.DB_DATABASE }}.* TO '${{ secrets.DB_USERNAME }}'@'localhost';"
+          mysql -e "FLUSH PRIVILEGES;"
 
       - name: Verify MySQL User Access
         run: |
-          sudo mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SELECT User, Host FROM mysql.user;"
+          mysql -e "SELECT User, Host FROM mysql.user;"
 
-
+      # Rest of your existing steps...
       - name: Create WebApp Zip File
         run: |
           zip -r webapp-demo.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*" || { echo "Zip failed!"; exit 1; }
