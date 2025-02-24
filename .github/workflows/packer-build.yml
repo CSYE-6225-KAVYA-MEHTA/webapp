@@ -63,39 +63,64 @@ jobs:
       #     -var "vpc_id=${{ secrets.VPC_ID }}" \
       #     img-creation.pkr.hcl
 
-      - name: Configure AWS Credentials
-        # working-directory: ./packer
-        # run: |
-        #   echo "Checking if img-creation.pkr.hcl exists in packer directory..."
-        #   ls -l img-creation.pkr.hcl || { echo "Error: img-creation.pkr.hcl not found"; exit 1; }
+      # - name: Configure AWS Credentials
+      #   # working-directory: ./packer
+      #   # run: |
+      #   #   echo "Checking if img-creation.pkr.hcl exists in packer directory..."
+      #   #   ls -l img-creation.pkr.hcl || { echo "Error: img-creation.pkr.hcl not found"; exit 1; }
 
-        #   packer build \
-        #   -var "aws_region=${{ secrets.AWS_REGION }}" \
-        #   -var "access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" \
-        #   -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
-        #   -var "subnet_id=${{ secrets.SUBNET_ID }}" \
-        #   -var "source_ami=${{ secrets.SOURCE_AMI }}" \
-        #   -var "dev_user=${{ secrets.DEV_USER }}" \
-        #   -var "demo_user=${{ secrets.DEMO_USER }}" \
-        #   -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
-        #   -var "vpc_id=${{ secrets.VPC_ID }}" \
-        #   img-creation.pkr.hcl
+      #   #   packer build \
+      #   #   -var "aws_region=${{ secrets.AWS_REGION }}" \
+      #   #   -var "access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" \
+      #   #   -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+      #   #   -var "subnet_id=${{ secrets.SUBNET_ID }}" \
+      #   #   -var "source_ami=${{ secrets.SOURCE_AMI }}" \
+      #   #   -var "dev_user=${{ secrets.DEV_USER }}" \
+      #   #   -var "demo_user=${{ secrets.DEMO_USER }}" \
+      #   #   -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
+      #   #   -var "vpc_id=${{ secrets.VPC_ID }}" \
+      #   #   img-creation.pkr.hcl
+      #   working-directory: ./packer
+      #   run: |
+      #     echo "Checking if img-creation.pkr.hcl exists in packer directory..."
+      #     ls -l img-creation.pkr.hcl || { echo "Error: img-creation.pkr.hcl not found"; exit 1; }
+
+      #     packer build\
+      #     -var-file=variables.pkrvars.hcl \
+      #     -var "aws_region=${{ secrets.AWS_REGION }}" \
+      #     -var "access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" \
+      #     -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+      #     -var "subnet_id=${{ secrets.SUBNET_ID }}" \
+      #     -var "source_ami=${{ secrets.SOURCE_AMI }}" \
+      #     -var "dev_user=${{ secrets.DEV_USER }}" \
+      #     -var "demo_user=${{ secrets.DEMO_USER }}" \
+      #     -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
+      #     -var "vpc_id=${{ secrets.VPC_ID }}" \
+      #     img-creation.pkr.hcl
+
+      - name: Create Packer Variable File
+        working-directory: ./packer
+        run: |
+          cat <<EOF > variables.pkrvars.hcl
+          aws_region       = "${{ secrets.AWS_REGION }}"
+          access_key       = "${{ secrets.AWS_ACCESS_KEY_ID }}"
+          secret_key       = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          subnet_id        = "${{ secrets.SUBNET_ID }}"
+          source_ami       = "${{ secrets.SOURCE_AMI }}"
+          dev_user         = "${{ secrets.DEV_USER }}"
+          demo_user        = "${{ secrets.DEMO_USER }}"
+          security_group_id = "${{ secrets.SECURITY_GROUP_ID }}"
+          vpc_id           = "${{ secrets.VPC_ID }}"
+          EOF
+
+      - name: Configure AWS Credentials
         working-directory: ./packer
         run: |
           echo "Checking if img-creation.pkr.hcl exists in packer directory..."
           ls -l img-creation.pkr.hcl || { echo "Error: img-creation.pkr.hcl not found"; exit 1; }
 
-          packer build\
+          packer build \
           -var-file=variables.pkrvars.hcl \
-          -var "aws_region=${{ secrets.AWS_REGION }}" \
-          -var "access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" \
-          -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
-          -var "subnet_id=${{ secrets.SUBNET_ID }}" \
-          -var "source_ami=${{ secrets.SOURCE_AMI }}" \
-          -var "dev_user=${{ secrets.DEV_USER }}" \
-          -var "demo_user=${{ secrets.DEMO_USER }}" \
-          -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
-          -var "vpc_id=${{ secrets.VPC_ID }}" \
           img-creation.pkr.hcl
 
       - name: Verify AMI Creation
