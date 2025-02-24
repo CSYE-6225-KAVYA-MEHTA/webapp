@@ -57,9 +57,15 @@ jobs:
       #     # Create zip excluding the packer directory and other unnecessary files
       #     zip -r webapp.zip . -x "packer/*" "*.git*" "*node_modules*" "*logs*" "*temp*"
 
+      - name: Install Zip Utility
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zip
+
       - name: Building webapp application artifact
         if: success()
-        run: zip -r webapp.zip .
+        run: |
+          zip -r webapp.zip .
 
       - name: Move Files to Packer Directory
         run: |
