@@ -64,8 +64,8 @@ jobs:
         working-directory: ./packer
         run: |
           echo 'aws_region = "${{ secrets.AWS_REGION }}"' > variables.pkrvars.hcl
-          echo 'access_key = "${{ secrets.AWS_ACCESS_KEY_ID }}"' >> variables.pkrvars.hcl
-          echo 'secret_key = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"' >> variables.pkrvars.hcl
+          echo 'access_key = "${{ secrets.AWS_ACCESS_KEY }}"' >> variables.pkrvars.hcl
+          echo 'secret_key = "${{ secrets.AWS_SECRET_KEY }}"' >> variables.pkrvars.hcl
           echo 'subnet_id = "${{ secrets.SUBNET_ID }}"' >> variables.pkrvars.hcl
           echo 'source_ami = "${{ secrets.SOURCE_AMI }}"' >> variables.pkrvars.hcl
           echo 'dev_user = "${{ secrets.DEV_USER }}"' >> variables.pkrvars.hcl
