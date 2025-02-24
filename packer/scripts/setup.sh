@@ -50,17 +50,14 @@ sudo useradd -m -s /bin/bash -g CSYE_6225_GROUP CSYE_6225_USER || echo "User alr
 
 echo "Make a new directory and Unzipping the web application..."
 sudo mkdir -p /opt/csye6225
-sudo unzip -o webapp.zip -d /opt/csye6225
+sudo unzip -o /tmp/webapp.zip -d /opt/csye6225/webapp
 
 echo "Updating permissions for the application directory..."
 sudo chown -R CSYE_6225_USER:CSYE_6225_GROUP /opt/csye6225
-sudo chmod -R 750 /opt/csye6225
+sudo chmod -R 755 /opt/csye6225
 
 echo "Setup complete! The application is now installed in /opt/csye6225."
 
 echo "-------Installing Node.js Project Dependencies-------"
 cd /opt/csye6225/webapp || exit 1
-npm install --unsafe-perm
-
-echo "-------Starting the Application-------"
-sudo -u csye6225 npm start &
+sudo -u csye_6225_user npm install --unsafe-perm
