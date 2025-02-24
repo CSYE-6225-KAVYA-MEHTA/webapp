@@ -76,6 +76,9 @@ jobs:
 
       - name: Upload zip
         uses: actions/upload-artifact@v4
+        with:
+          name: artifact
+          path: webapp.zip
       # - name: Move Files to Packer Directory
       #   run: |
       #     # Move the zip file to packer directory
