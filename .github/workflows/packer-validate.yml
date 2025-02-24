@@ -66,19 +66,19 @@ jobs:
           packer init .
           packer fmt -recursive .
           packer validate \
-            -var "aws_region=${{ secrets.AWS_REGION }}" \
-            -var "subnet_id=${{ secrets.SUBNET_ID }}" \
-            -var "source_ami=${{ secrets.SOURCE_AMI }}" \
-            -var "dev_user=${{ secrets.DEV_USER }}" \
-            -var "demo_user=${{ secrets.DEMO_USER }}" \
-            -var "access_key=${{ secrets.AWS_ACCESS_KEY }}" \
-            -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}" \
-            -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
-            -var "db_username=${{ secrets.DB_USERNAME }}" \
-            -var "db_password=${{ secrets.DB_PASSWORD }}" \
-            -var "db_database=${{ secrets.DB_DATABASE }}" \
-            -var "vpc_id=${{ secrets.VPC_ID }}" \
-            img-creation.pkr.hcl
+          -var "aws_region=${{ secrets.AWS_REGION }}" \
+          -var "subnet_id=${{ secrets.SUBNET_ID }}" \
+          -var "source_ami=${{ secrets.SOURCE_AMI }}" \
+          -var "dev_user=${{ secrets.DEV_USER }}" \
+          -var "demo_user=${{ secrets.DEMO_USER }}" \
+          -var "access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" \
+          -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+          -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
+          -var "db_username=${{ secrets.DB_USERNAME }}" \
+          -var "db_password=${{ secrets.DB_PASSWORD }}" \
+          -var "db_database=${{ secrets.DB_DATABASE }}" \
+          -var "vpc_id=${{ secrets.VPC_ID }}" \
+          img-creation.pkr.hcl
 
       - name: Validation Results Upload
         uses: actions/upload-artifact@v4
