@@ -72,7 +72,7 @@ jobs:
             -var "dev_user=${{ secrets.DEV_USER }}" \
             -var "demo_user=${{ secrets.DEMO_USER }}" \
             -var "access_key=${{ secrets.AWS_ACCESS_KEY }}" \
-            -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+            -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}" \
             -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
             -var "db_username=${{ secrets.DB_USERNAME }}" \
             -var "db_password=${{ secrets.DB_PASSWORD }}" \

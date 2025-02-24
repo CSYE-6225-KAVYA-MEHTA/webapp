@@ -53,7 +53,7 @@ jobs:
             -var "source_ami=${{ secrets.SOURCE_AMI }}" \
             -var "dev_user=${{ secrets.DEV_USER }}" \
             -var "demo_user=${{ secrets.DEMO_USER }}" \
-            -var "aws_access_key=${{ secrets.AWS_ACCESS_KEY }}" \
+            -var "aws_access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" \
             -var "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
             -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
             -var "vpc_id=${{ secrets.VPC_ID }}" \
