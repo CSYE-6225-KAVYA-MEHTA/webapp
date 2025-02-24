@@ -135,7 +135,7 @@ build {
 
   provisioner "file" {
     source      = "../webapp.zip"
-    destination = "../tmp/webapp.zip"
+    destination = "/tmp/webapp.zip"
   }
 
   provisioner "shell" {
@@ -148,12 +148,21 @@ build {
       ]
     }
 
-  provisioner "shell"{
+  # provisioner "shell"{
+  #   source ="scripts/setup.sh"
+  # }
+
+
+  provisioner "shell" {
+    inline = [
+      "echo web app zip process",
+      "sudo ls -al",
+      "sudo cp webapp.zip /opt/webapp",
+      "cd /opt/webapp",
+      "sudo unzip webapp.zip",
+    ]
     source ="scripts/setup.sh"
   }
-
-
-  
 
   # provisioner "shell" {
   #   inline = [
