@@ -1,16 +1,18 @@
-name: Packer AWS Build
+name: Packer Build CI
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
 
 jobs:
-  validate:
-    name: Validate Packer Configuration
+  build:
+    name: packer-build
     runs-on: ubuntu-latest
 
     env:
+      MYSQL_USERNAME: ${{ secrets.DB_USERNAME }}
+      MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
       SUBNET_ID: ${{ secrets.SUBNET_ID }}
       SOURCE_AMI: ${{ secrets.SOURCE_AMI }}
@@ -19,64 +21,55 @@ jobs:
       AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
-      DB_USERNAME: ${{ secrets.DB_USERNAME }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_DATABASE: ${{ secrets.DB_DATABASE }}
       VPC_ID: ${{ secrets.VPC_ID }}
 
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Debug - List Directory Contents
+      - name: Create Zip File
         run: |
-          echo "Root directory contents:"
-          ls -la
-          echo "Packer directory contents (if exists):"
-          ls -la packer || echo "Packer directory not found"
+          zip -r webapp.zip .
 
-      - name: Install Packer
-        uses: hashicorp/setup-packer@v2
+      - name: List Files
+        run: ls -al
 
-      - name: Ensure Required Files Exist
+      - name: Upload Zip File
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp zip creation
+          path: webapp.zip
+
+      - name: Move Zip file to Packer Folder
         run: |
-          if [ ! -f packer/img-creation.pkr.hcl ]; then
-            echo "ERROR: packer/img-creation.pkr.hcl is missing!"
-            exit 1
-          fi
-          if [ ! -f scripts/setup.sh ]; then
-            echo "ERROR: scripts/setup.sh is missing!"
-            exit 1
-          fi
+          ls
+          pwd
+          sudo mv /home/runner/work/webapp/webapp/webapp.zip /home/runner/work/webapp/webapp/packer/
 
-      - name: Create WebApp Zip File
+      - name: Packer init
         run: |
-          zip -r webapp-demo.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*"
-          mv webapp-demo.zip packer/
+          # Install Packer
+          curl -fsSL https://releases.hashicorp.com/packer/1.7.3/packer_1.7.3_linux_amd64.zip -o packer.zip
+          packer init img-creation.pkr.hcl
 
-      - name: Initialize and Validate Packer
-        working-directory: ./packer
+      - name: Run Packer
         run: |
-          packer init .
-          packer fmt -recursive .
-          packer validate \
+          packer build \
             -var "aws_region=${{ env.AWS_REGION }}" \
             -var "subnet_id=${{ env.SUBNET_ID }}" \
             -var "source_ami=${{ env.SOURCE_AMI }}" \
             -var "dev_user=${{ env.DEV_USER }}" \
-            -var "demo_user=${{ env.DEV_USER }}" \
-            -var "access_key=${{ env.AWS_ACCESS_KEY }}" \
-            -var "secret_key=${{ env.AWS_SECRET_ACCESS_KEY }}" \
+            -var "demo_user=${{ env.DEMO_USER }}" \
+            -var "aws_access_key=${{ env.AWS_ACCESS_KEY }}" \
+            -var "aws_secret_access_key=${{ env.AWS_SECRET_ACCESS_KEY }}" \
             -var "security_group_id=${{ env.SECURITY_GROUP_ID }}" \
-            -var "db_username=${{ env.DB_USERNAME }}" \
-            -var "db_password=${{ env.DB_PASSWORD }}" \
-            -var "db_database=${{ env.DB_DATABASE }}" \
             -var "vpc_id=${{ env.VPC_ID }}" \
             img-creation.pkr.hcl
 
-      - name: Validation Results Upload
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: validation-results
-          path: packer/validation.log
+      - name: Verify AMI Creation
+        run: |
+          aws ec2 describe-images \
+            --owners self \
+            --filters "Name=name,Values=CSYE6225*" \
+            --query 'Images[*].[ImageId,State,CreationDate]' \
+            --output table
