@@ -1,4 +1,4 @@
-name: Packer AWS Validation
+name: Packer AWS Build
 
 on:
   pull_request:
