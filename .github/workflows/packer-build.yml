@@ -52,10 +52,14 @@ jobs:
           echo "Current directory structure:"
           ls -R
 
-      - name: Create Zip File
-        run: |
-          # Create zip excluding the packer directory and other unnecessary files
-          zip -r webapp.zip . -x "packer/*" "*.git*" "*node_modules*" "*logs*" "*temp*"
+      # - name: Create Zip File
+      #   run: |
+      #     # Create zip excluding the packer directory and other unnecessary files
+      #     zip -r webapp.zip . -x "packer/*" "*.git*" "*node_modules*" "*logs*" "*temp*"
+
+      - name: Building webapp application artifact
+        if: success()
+        run: zip -r webapp.zip .
 
       - name: Move Files to Packer Directory
         run: |
