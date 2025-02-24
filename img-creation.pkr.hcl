@@ -133,19 +133,6 @@ source "amazon-ebs" "ubuntu" {
 build {
   sources = ["source.amazon-ebs.ubuntu"]
 
-
-provisioner "file" {
-  source      = "webapp.zip"  
-  destination = "/home/ubuntu/webapp.zip"
-}
-
-  provisioner "file" {
-    source = "scripts/setup.sh"
-
-    destination = "/home/ubuntu/setup.sh"
-  }
-
-
   # provisioner "shell" {
   #   inline = [
   #     "export DB_DATABASE=${var.db_database}",
