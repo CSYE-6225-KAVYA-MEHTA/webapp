@@ -57,20 +57,23 @@ jobs:
       #     # Create zip excluding the packer directory and other unnecessary files
       #     zip -r webapp.zip . -x "packer/*" "*.git*" "*node_modules*" "*logs*" "*temp*"
 
-      - name: Install Zip Utility
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y zip
-
       - name: Building webapp application artifact
-        if: success()
         run: |
           zip -r webapp.zip .
 
+      - name: Upload zip
+        uses: actions/upload-artifact@v4
       # - name: Move Files to Packer Directory
       #   run: |
       #     # Move the zip file to packer directory
-      #     mv webapp.zip 
+      #     mv webapp.zip
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Debug Directory Structure After
         run: |

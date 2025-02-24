@@ -134,32 +134,34 @@ build {
   sources = ["source.amazon-ebs.ubuntu"]
 
   provisioner "file" {
-  source      = "scripts/setup.sh"
-  destination = "/home/ubuntu/setup.sh"
-}
-
-
-  provisioner "shell" {
-    execute_command = "bash -c '{{ .Vars }} {{ .Path }}'" # Explicitly use bash
-    inline = [
-      "set -eux", # Remove pipefail but keep other useful options
-      "export DB_DATABASE=${var.db_database}",
-      "export DB_USERNAME=${var.db_username}",
-      "export DB_PASSWORD=${var.db_password}",
-      "export DB_HOST=${var.db_host}",
-      "export PORT=${var.port}",
-      "sudo chmod +x /home/ubuntu/setup.sh",
-      "sudo /home/ubuntu/setup.sh localhost"
-    ]
+    source      = "../webapp.zip"
+    destination = "../tmp/webapp.zip"
   }
 
   provisioner "shell" {
-    inline = [
-      "sudo apt-get update",
-      "sudo apt-get install -y mysql-server",
-      "sudo systemctl daemon-reload",
-      "sudo systemctl enable mysql",
-      "sudo systemctl start mysql"
-    ]
+      inline = [
+        "export DB_DATABASE=${var.db_database}",
+        "export DB_USERNAME=${var.db_username}",
+        "export DB_PASSWORD=${var.db_password}",
+        "export DB_HOST=${var.db_host}",
+        "export PORT=${var.port}"
+      ]
+    }
+
+  provisioner "shell"{
+    source ="scripts/setup.sh"
   }
+
+
+  
+
+  # provisioner "shell" {
+  #   inline = [
+  #     "sudo apt-get update",
+  #     "sudo apt-get install -y mysql-server",
+  #     "sudo systemctl daemon-reload",
+  #     "sudo systemctl enable mysql",
+  #     "sudo systemctl start mysql"
+  #   ]
+  # }
 }
