@@ -135,8 +135,8 @@ build {
 
 
 provisioner "file" {
-  source      = "webapp-demo.zip"  
-  destination = "/home/ubuntu/webapp-demo.zip"
+  source      = "webapp.zip"  
+  destination = "/home/ubuntu/webapp.zip"
 }
 
   provisioner "file" {
