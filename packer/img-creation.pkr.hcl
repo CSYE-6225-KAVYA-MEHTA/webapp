@@ -134,7 +134,7 @@ build {
   sources = ["source.amazon-ebs.ubuntu"]
 
   provisioner "file" {
-    source      = "../webapp.zip"
+    source      = "webapp.zip"
     destination = "/tmp/webapp.zip"
   }
 
@@ -154,13 +154,6 @@ build {
 
 
   provisioner "shell" {
-    inline = [
-      "echo web app zip process",
-      "sudo ls -al",
-      "sudo cp webapp.zip /opt/webapp",
-      "cd /opt/webapp",
-      "sudo unzip webapp.zip",
-    ]
     source ="scripts/setup.sh"
   }
 
