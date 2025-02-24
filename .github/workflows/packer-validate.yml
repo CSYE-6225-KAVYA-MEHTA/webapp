@@ -7,7 +7,7 @@ on:
 
 jobs:
   validate:
-    name: Validate Packer Configuration
+    name: Validate Packer Configuration #
     runs-on: ubuntu-latest
 
     env:
