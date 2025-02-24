@@ -22,12 +22,14 @@ variable "instance_type" {
   default = "t2.micro"
 }
 
-variable "access_key" {
+variable "AWS_ACCESS_KEY" {
   type = string
+  default=""
 }
 
-variable "secret_key" {
+variable "AWS_SECRET_KEY" {
   type = string
+  default=""
 }
 
 
@@ -104,14 +106,15 @@ variable "port" {
 }
 
 source "amazon-ebs" "ubuntu" {
-  ami_name          = "${var.ami_name}-${local.timestamp}"
-  ami_description   = "AMI for CSYE6225 A04 KAVYA MEHTA"
-  ami_regions       = ["us-east-1"]
-  ami_users         = [var.dev_user]
-  instance_type     = var.instance_type
-  region            = var.aws_region
-  access_key        = var.access_key
-  secret_key        = var.secret_key
+  ami_name        = "${var.ami_name}-${local.timestamp}"
+  ami_description = "AMI for CSYE6225 A04 KAVYA MEHTA"
+  ami_regions     = ["us-east-1"]
+  ami_users       = [var.dev_user]
+  instance_type   = var.instance_type
+  region          = var.aws_region
+  access_key      = var.AWS_ACCESS_KEY # Reference the access key variable
+  secret_key      = var.AWS_SECRET_KEY # Reference the secret key variable
+
   source_ami        = var.source_ami
   ssh_interface     = "public_ip"
   ssh_username      = var.ssh_username
@@ -131,18 +134,18 @@ build {
   sources = ["source.amazon-ebs.ubuntu"]
 
   provisioner "shell" {
-  execute_command = "bash -c '{{ .Vars }} {{ .Path }}'"  # Explicitly use bash
-  inline = [
-    "set -eux", # Remove pipefail but keep other useful options
-    "export DB_DATABASE=${var.db_database}",
-    "export DB_USERNAME=${var.db_username}",
-    "export DB_PASSWORD=${var.db_password}",
-    "export DB_HOST=${var.db_host}",
-    "export PORT=${var.port}",
-    "sudo chmod +x /home/ubuntu/setup.sh",
-    "sudo /home/ubuntu/setup.sh localhost"
-  ]
-}
+    execute_command = "bash -c '{{ .Vars }} {{ .Path }}'" # Explicitly use bash
+    inline = [
+      "set -eux", # Remove pipefail but keep other useful options
+      "export DB_DATABASE=${var.db_database}",
+      "export DB_USERNAME=${var.db_username}",
+      "export DB_PASSWORD=${var.db_password}",
+      "export DB_HOST=${var.db_host}",
+      "export PORT=${var.port}",
+      # "sudo chmod +x /home/ubuntu/setup.sh",
+      # "sudo /home/ubuntu/setup.sh localhost"
+    ]
+  }
 
   provisioner "shell" {
     inline = [

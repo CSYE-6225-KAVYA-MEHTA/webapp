@@ -9,6 +9,21 @@ jobs:
     name: packer-build
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
+
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -45,10 +60,6 @@ jobs:
           packer fmt -recursive .
 
       - name: Configure AWS Credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
 
         working-directory: ./packer
         run: |
@@ -56,7 +67,9 @@ jobs:
           ls -l img-creation.pkr.hcl || { echo "Error: img-creation.pkr.hcl not found"; exit 1; }
 
           packer build \
-          -var "aws_region=$AWS_DEFAULT_REGION" \
+          -var "aws_region=${{secrets.AWS_REGION}}" \
+          -var "access_key=${{ secrets.aws_access_key }}" \
+          -var "secret_key=${{ secrets.aws_secret_key }}" \}
           -var "subnet_id=${{ secrets.SUBNET_ID }}" \
           -var "source_ami=${{ secrets.SOURCE_AMI }}" \
           -var "dev_user=${{ secrets.DEV_USER }}" \
@@ -64,6 +77,41 @@ jobs:
           -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
           -var "vpc_id=${{ secrets.VPC_ID }}" \
           img-creation.pkr.hcl
+
+      # - name: Configure AWS Credentials
+      #   # working-directory: ./packer
+      #   # run: |
+      #   #   echo "Checking if img-creation.pkr.hcl exists in packer directory..."
+      #   #   ls -l img-creation.pkr.hcl || { echo "Error: img-creation.pkr.hcl not found"; exit 1; }
+
+      #   #   packer build \
+      #   #   -var "aws_region=${{ secrets.AWS_REGION }}" \
+      #   #   -var "access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" \
+      #   #   -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+      #   #   -var "subnet_id=${{ secrets.SUBNET_ID }}" \
+      #   #   -var "source_ami=${{ secrets.SOURCE_AMI }}" \
+      #   #   -var "dev_user=${{ secrets.DEV_USER }}" \
+      #   #   -var "demo_user=${{ secrets.DEMO_USER }}" \
+      #   #   -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
+      #   #   -var "vpc_id=${{ secrets.VPC_ID }}" \
+      #   #   img-creation.pkr.hcl
+      #   working-directory: ./packer
+      #   run: |
+      #     echo "Checking if img-creation.pkr.hcl exists in packer directory..."
+      #     ls -l img-creation.pkr.hcl || { echo "Error: img-creation.pkr.hcl not found"; exit 1; }
+
+      #     packer build\
+      #     -var-file=variables.pkrvars.hcl \
+      #     -var "aws_region=${{ secrets.AWS_REGION }}" \
+      #     -var "access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" \
+      #     -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+      #     -var "subnet_id=${{ secrets.SUBNET_ID }}" \
+      #     -var "source_ami=${{ secrets.SOURCE_AMI }}" \
+      #     -var "dev_user=${{ secrets.DEV_USER }}" \
+      #     -var "demo_user=${{ secrets.DEMO_USER }}" \
+      #     -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
+      #     -var "vpc_id=${{ secrets.VPC_ID }}" \
+      #     img-creation.pkr.hcl
 
       - name: Verify AMI Creation
         run: |
