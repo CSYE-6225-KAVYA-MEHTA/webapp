@@ -78,7 +78,7 @@ jobs:
         run: |
           mkdir -p packer
           mv img-creation.pkr.hcl packer/
-          mv webapp.zip packer/
+          mv webapp-demo.zip packer/
           mv webapp.service packer/
           mv scripts/setup.sh packer/
 
