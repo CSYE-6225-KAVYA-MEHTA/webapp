@@ -22,11 +22,11 @@ variable "instance_type" {
   default = "t2.micro"
 }
 
-variable "aws_access_key" {
+variable "AWS_ACCESS_KEY" {
   type = string
 }
 
-variable "aws_secret_key" {
+variable "AWS_SECRET_KEY" {
   type = string
 }
 
@@ -110,8 +110,8 @@ source "amazon-ebs" "ubuntu" {
   ami_users       = [var.dev_user]
   instance_type   = var.instance_type
   region          = var.aws_region
-  access_key      = var.aws_access_key # Reference the access key variable
-  secret_key      = var.aws_secret_key # Reference the secret key variable
+  access_key      = var.AWS_ACCESS_KEY # Reference the access key variable
+  secret_key      = var.AWS_SECRET_KEY # Reference the secret key variable
 
   source_ami        = var.source_ami
   ssh_interface     = "public_ip"
