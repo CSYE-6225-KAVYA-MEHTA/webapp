@@ -45,10 +45,6 @@ jobs:
           packer fmt -recursive .
 
       - name: Configure AWS Credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
 
         working-directory: ./packer
         run: |
@@ -57,6 +53,8 @@ jobs:
 
           packer build \
           -var "aws_region=$AWS_DEFAULT_REGION" \
+          -var "access_key=${{ secrets.aws_access_key }}" \
+          -var "secret_key=${{ secrets.aws_secret_key }}" \}
           -var "subnet_id=${{ secrets.SUBNET_ID }}" \
           -var "source_ami=${{ secrets.SOURCE_AMI }}" \
           -var "dev_user=${{ secrets.DEV_USER }}" \

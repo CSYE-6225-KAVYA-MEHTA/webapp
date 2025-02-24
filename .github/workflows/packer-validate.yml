@@ -71,8 +71,8 @@ jobs:
           -var "source_ami=${{ secrets.SOURCE_AMI }}" \
           -var "dev_user=${{ secrets.DEV_USER }}" \
           -var "demo_user=${{ secrets.DEMO_USER }}" \
-          -var "access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" \
-          -var "secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+          -var "access_key=${{ secrets.aws_access_key }}" \
+          -var "secret_key=${{ secrets.aws_secret_key }}" \
           -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
           -var "db_username=${{ secrets.DB_USERNAME }}" \
           -var "db_password=${{ secrets.DB_PASSWORD }}" \
