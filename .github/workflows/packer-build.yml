@@ -9,19 +9,19 @@ jobs:
     name: packer-build
     runs-on: ubuntu-latest
 
-    env:
-      MYSQL_USERNAME: ${{ secrets.DB_USERNAME }}
-      MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      SUBNET_ID: ${{ secrets.SUBNET_ID }}
-      SOURCE_AMI: ${{ secrets.SOURCE_AMI }}
-      DEV_USER: ${{ secrets.DEV_USER }}
-      DEMO_USER: ${{ secrets.DEMO_USER }}
-      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
-      VPC_ID: ${{ secrets.VPC_ID }}
+    # env:
+    #   MYSQL_USERNAME: ${{ secrets.DB_USERNAME }}
+    #   MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
+    #   MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
+    #   AWS_REGION: ${{ secrets.AWS_REGION }}
+    #   SUBNET_ID: ${{ secrets.SUBNET_ID }}
+    #   SOURCE_AMI: ${{ secrets.SOURCE_AMI }}
+    #   DEV_USER: ${{ secrets.DEV_USER }}
+    #   DEMO_USER: ${{ secrets.DEMO_USER }}
+    #   AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #   SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
+    #   VPC_ID: ${{ secrets.VPC_ID }}
 
     steps:
       - name: Checkout code
@@ -62,15 +62,15 @@ jobs:
         working-directory: ./packer
         run: |
           packer build \
-            -var "aws_region=${{ env.AWS_REGION }}" \
-            -var "subnet_id=${{ env.SUBNET_ID }}" \
-            -var "source_ami=${{ env.SOURCE_AMI }}" \
-            -var "dev_user=${{ env.DEV_USER }}" \
-            -var "demo_user=${{ env.DEMO_USER }}" \
-            -var "aws_access_key=${{ env.AWS_ACCESS_KEY }}" \
-            -var "aws_secret_access_key=${{ env.AWS_SECRET_ACCESS_KEY }}" \
-            -var "security_group_id=${{ env.SECURITY_GROUP_ID }}" \
-            -var "vpc_id=${{ env.VPC_ID }}" \
+            -var "aws_region=${{ secrets.AWS_REGION }}" \
+            -var "subnet_id=${{ secrets.SUBNET_ID }}" \
+            -var "source_ami=${{ secrets.SOURCE_AMI }}" \
+            -var "dev_user=${{ secrets.DEV_USER }}" \
+            -var "demo_user=${{ secrets.DEMO_USER }}" \
+            -var "aws_access_key=${{ secrets.AWS_ACCESS_KEY }}" \
+            -var "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+            -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
+            -var "vpc_id=${{ secrets.VPC_ID }}" \
             img-creation.pkr.hcl
 
       - name: Verify AMI Creation
