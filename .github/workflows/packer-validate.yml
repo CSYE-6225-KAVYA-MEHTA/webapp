@@ -55,13 +55,6 @@ jobs:
         uses: hashicorp/setup-packer@v2
 
       - name: Move to Packer Directory and Initialize
-        run: |
-          cd packer
-          packer init .
-          packer fmt -recursive .
-          packer validate img-creation.pkr.hcl
-
-      - name: Move to Packer Directory and Initialize
         working-directory: ./packer
         run: |
           packer init .
