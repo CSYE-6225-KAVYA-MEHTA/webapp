@@ -82,11 +82,3 @@ jobs:
           ls -l img-creation.pkr.hcl || { echo "Error: img-creation.pkr.hcl not found"; exit 1; }
 
           packer build -var-file=variables.pkrvars.hcl img-creation.pkr.hcl
-
-      - name: Verify AMI Creation
-        run: |
-          aws ec2 describe-images \
-            --owners self \
-            --filters "Name=name,Values=CSYE6225*" \
-            --query 'Images[*].[ImageId,State,CreationDate]' \
-            --output table
