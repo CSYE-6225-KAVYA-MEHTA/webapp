@@ -133,31 +133,6 @@ source "amazon-ebs" "ubuntu" {
 build {
   sources = ["source.amazon-ebs.ubuntu"]
 
-
-provisioner "file" {
-  source      = "webapp-demo.zip"  
-  destination = "/home/ubuntu/webapp-demo.zip"
-}
-
-  provisioner "file" {
-    source = "scripts/setup.sh"
-
-    destination = "/home/ubuntu/setup.sh"
-  }
-
-
-  # provisioner "shell" {
-  #   inline = [
-  #     "export DB_DATABASE=${var.db_database}",
-  #     "export DB_USERNAME=${var.db_username}",
-  #     "export DB_PASSWORD=${var.db_password}",
-  #     "export DB_HOST=${var.db_host}",
-  #     "export PORT=${var.port}",
-  #     "sudo chmod +x /home/ubuntu/setup.sh",
-  #     "sudo /home/ubuntu/setup.sh localhost"
-  #   ]
-  # }
-
   provisioner "shell" {
   execute_command = "bash -c '{{ .Vars }} {{ .Path }}'"  # Explicitly use bash
   inline = [
