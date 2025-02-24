@@ -27,32 +27,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install Packer
+        uses: hashicorp/setup-packer@v2
+        with:
+          version: "1.9.4" # Using a more recent version
+
+      - name: Debug Directory Structure
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Directory contents:"
+          ls -R
+          echo "Packer directory contents:"
+          ls -la packer/
+
       - name: Create Zip File
         run: |
-          zip -r webapp.zip .
+          zip -r webapp.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*"
 
-      - name: List Files
-        run: ls -al
-
-      - name: Upload Zip File
-        uses: actions/upload-artifact@v4
-        with:
-          name: webapp zip creation
-          path: webapp.zip
-
-      - name: Move Zip file to Packer Folder
+      - name: Create Packer Directory and Move Files
         run: |
-          ls
-          pwd
-          sudo mv /home/runner/work/webapp/webapp/webapp.zip /home/runner/work/webapp/webapp/packer/
+          mkdir -p packer
+          mv webapp.zip packer/
+          cp img-creation.pkr.hcl packer/
+          cp -r scripts packer/
 
-      - name: Packer init
+      - name: Initialize Packer
+        working-directory: ./packer
         run: |
-          # Install Packer
-          curl -fsSL https://releases.hashicorp.com/packer/1.7.3/packer_1.7.3_linux_amd64.zip -o packer.zip
-          packer init img-creation.pkr.hcl
+          packer init .
+          packer fmt -recursive .
 
-      - name: Run Packer
+      - name: Run Packer Build
+        working-directory: ./packer
         run: |
           packer build \
             -var "aws_region=${{ env.AWS_REGION }}" \
