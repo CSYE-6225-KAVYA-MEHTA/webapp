@@ -154,8 +154,8 @@ build {
 
 
   provisioner "shell" {
-    source = "scripts/setup.sh"
-  }
+  script = "scripts/setup.sh"
+}
 
   # provisioner "shell" {
   #   inline = [
