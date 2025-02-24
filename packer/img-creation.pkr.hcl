@@ -22,12 +22,16 @@ variable "instance_type" {
   default = "t2.micro"
 }
 
-variable "aws_secret_access_key" {
-  type = string
+variable "access_key" {
+  type      = string
+  default   = env("AWS_ACCESS_KEY_ID")
+  sensitive = true
 }
 
-variable "aws_access_key" {
-  type = string
+variable "secret_key" {
+  type      = string
+  default   = env("AWS_SECRET_ACCESS_KEY")
+  sensitive = true
 }
 
 variable "source_ami" {
