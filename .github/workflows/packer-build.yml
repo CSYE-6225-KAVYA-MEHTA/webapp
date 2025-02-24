@@ -33,15 +33,24 @@ jobs:
           sudo apt-get install -y mysql-server
           sudo systemctl start mysql
           sudo systemctl enable mysql
-          sudo mysql -e "CREATE DATABASE IF NOT EXISTS ${{ secrets.DB_DATABASE }};"
-          sudo mysql -e "CREATE USER IF NOT EXISTS '${{ secrets.DB_USERNAME }}'@'localhost' IDENTIFIED BY '${{ secrets.DB_PASSWORD }}';"
-          sudo mysql -e "GRANT ALL PRIVILEGES ON ${{ secrets.DB_DATABASE }}.* TO '${{ secrets.DB_USERNAME }}'@'localhost';"
-          sudo mysql -e "FLUSH PRIVILEGES;"
+          
+          # Ensure MySQL root user can connect
+          sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${{ secrets.MYSQL_ROOT_PASSWORD }}'; FLUSH PRIVILEGES;"
+          
+          # Wait for MySQL to fully start
+          sleep 5
 
-      - name: Verify MySQL Status
+          # Create database and user with correct privileges
+          sudo mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "CREATE DATABASE IF NOT EXISTS ${{ secrets.DB_DATABASE }};"
+          sudo mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "CREATE USER IF NOT EXISTS '${{ secrets.DB_USERNAME }}'@'localhost' IDENTIFIED BY '${{ secrets.DB_PASSWORD }}';"
+          sudo mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "GRANT ALL PRIVILEGES ON ${{ secrets.DB_DATABASE }}.* TO '${{ secrets.DB_USERNAME }}'@'localhost';"
+          sudo mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "FLUSH PRIVILEGES;"
+
+
+      - name: Verify MySQL User Access
         run: |
-          sudo systemctl status mysql || echo "MySQL Service Failed to Start!"
-          sudo mysql -e "SHOW DATABASES;"
+          sudo mysql -uroot -p${{ secrets.MYSQL_ROOT_PASSWORD }} -e "SELECT User, Host FROM mysql.user;"
+
 
       - name: Create WebApp Zip File
         run: |
