@@ -196,7 +196,7 @@ build {
       "echo 'Creating Database...'",
       "sudo mysql -e \"CREATE DATABASE IF NOT EXISTS Health_Check;\"",
       # "sudo mysql -e \"CREATE USER IF NOT EXISTS 'kavya'@'localhost' IDENTIFIED BY 'root';\"",
-      "sudo mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$DB_PASSWORD'",
+      "sudo mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${var.db_password}';\"",
       "sudo mysql -e \"GRANT ALL PRIVILEGES ON *.* TO 'kavya'@'localhost' WITH GRANT OPTION;\"",
 
       "sudo mysql -e \"FLUSH PRIVILEGES;\"",
