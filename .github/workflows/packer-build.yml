@@ -1,123 +1,124 @@
-name: Packer Build
+name: ami_creation
 
 on:
   push:
-    branches: ["main"] #
+    branches:
+      - main
 
 jobs:
-  build:
-    name: packer-build
+  test:
+    name: Run Tests
     runs-on: ubuntu-latest
-
-    env:
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      SUBNET_ID: ${{ secrets.SUBNET_ID }}
-      SOURCE_AMI: ${{ secrets.SOURCE_AMI }}
-      DEV_USER: ${{ secrets.DEV_USER }}
-      DEMO_USER: ${{ secrets.DEMO_USER }}
-      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY}}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
-      DB_USERNAME: ${{ secrets.DB_USERNAME }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_DATABASE: ${{ secrets.DB_DATABASE }}
-      VPC_ID: ${{ secrets.VPC_ID }}
+    if: github.repository == 'CSYE6225-Fall24/webapp'
 
     services:
       mysql:
-        image: mysql:8.0
+        image: mysql:5.7
         env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: root_password
           MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
-
+          MYSQL_USER: ${{ secrets.DB_USER }}
+          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports:
           - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
+        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_NAME: ${{ secrets.DB_DATABASE }}
+      DB_PORT: 3306
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      PORT: ${{ secrets.PORT }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      AMI_USERS: ${{ secrets.AMI_USERS }}
 
     steps:
+      # Step 1: Checkout the repository code
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      - name: Install Packer
-        uses: hashicorp/setup-packer@v2
+      # Step 2: Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          version: "1.9.4"
+          node-version: "16"
 
-      - name: Setting up Node.js
-        uses: actions/setup-node@v3
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Wait for MySQL to be ready
+      - name: Wait for MySQL
+        run: |
+          while ! mysqladmin ping -h 127.0.0.1 --silent; do
+            echo "Waiting for MySQL...";
+            sleep 5;
+          done
+
+      # Step 5: Run SQL to create database and user (if needed)
+      - name: Create database and user
+        run: |
+          mysql --host=127.0.0.1 --port=3306 --user=root --password=root_password -e "
+          CREATE DATABASE IF NOT EXISTS ${DB_DATABASE};
+          CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+          GRANT ALL PRIVILEGES ON ${DB_DATABASE}.* TO '${DB_USER}'@'%';
+          FLUSH PRIVILEGES;
+          "
+
+      # Step 6: Run tests
+      - name: Run tests
+        run: npx jest src/tests/healthController.test.js
+
+      - name: Create .env file
+        run: |
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_DATABASE }}" >> .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "PORT=8080" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+
+      - name: List Files and delete node modules
+        run: |
+          sudo rm -rf node_modules
+          ls -al
+
+      - name: Create Zip File
+        run: |
+          zip -r webapp.zip .
+
+      - name: Upload Zip File
+        uses: actions/upload-artifact@v3
         with:
-          node-version: "18.x"
-
-      - name: Debug Directory Structure Before
-        run: |
-          echo "Current directory structure:"
-          ls -R
-
-      # - name: Create Zip File
-      #   run: |
-      #     # Create zip excluding the packer directory and other unnecessary files
-      #     zip -r webapp.zip . -x "packer/*" "*.git*" "*node_modules*" "*logs*" "*temp*"
-
-      - name: Install Zip Utility
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y zip
-
-      - name: Building webapp application artifact
-        run: |
-          zip -r webapp.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*"
-
-      - name: Debug - Check if WebApp Zip File Exists
-        run: |
-          if [ ! -f webapp.zip ]; then
-            echo "ERROR: webapp.zip file is missing!"
-            exit 1
-          fi
-          ls -al webapp.zip
-
-      - name: Upload zip
-        uses: actions/upload-artifact@v4
-        with:
-          name: artifact
+          name: webapp zip creation
           path: webapp.zip
-      # - name: Move Files to Packer Directory
-      #   run: |
-      #     # Move the zip file to packer directory
-      #     mv webapp.zip
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Debug Directory Structure After
+      - name: Moving Zip to APP_TEST
         run: |
-          echo "Final directory structure:"
-          ls -R
-
-      - name: Initialize Packer
-
+          ls
+          pwd
+          sudo mv /home/runner/work/webapp/webapp/webapp.zip /home/runner/work/webapp/webapp/src/
+      - name: Run Packer
         run: |
-          packer init .
-          packer fmt -recursive .
-
-      - name: Upload Systemd Service File
-
-        run: |
-
-          cp application.service ./packer
-
-      - name: Configure AWS Credentials
-
-        run: |
-
-          echo "Checking if img-creation.pkr.hcl exists in packer directory..."
-          ls -l img-creation.pkr.hcl || { echo "Error: img-creation.pkr.hcl not found"; exit 1; }
-
-          packer build -var-file=variables.pkrvars.hcl img-creation.pkr.hcl
+          # Install Packer
+          curl -fsSL https://releases.hashicorp.com/packer/1.7.3/packer_1.7.3_linux_amd64.zip -o packer.zip
+          unzip packer.zip
+          sudo mv packer /usr/local/bin/
+          ls
+          pwd
+          cd src
+          packer init aws-ubuntu.pkr.hcl
+           packer build \
+            -var 'db_name=${{ secrets.DB_DATABASE }}' \
+            -var 'db_user=${{ secrets.DB_USER }}' \
+            -var 'db_password=${{ secrets.DB_PASSWORD }}' \
+            -var 'aws_region=${{ secrets.AWS_REGION }}' \
+            -var 'source_ami=${{ secrets.SOURCE_AMI }}' \
+            -var 'ssh_username=${{ secrets.SSH_USERNAME }}' \
+            -var 'subnet_id=${{ secrets.SUBNET_ID }}' \
+            -var 'aws_access_key=${{ secrets.AWS_ACCESS_KEY }}' \
+            -var 'aws_secret_key=${{ secrets.AWS_SECRET_KEY }}' \
+            -var 'ami_users=${{ secrets.AMI_USERS }}' \
+            img-creation.pkr.hcl
