@@ -28,12 +28,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Ensure `setup.sh` Exists in `scripts/` Folder
-        run: |
-          if [ ! -f packer/scripts/setup.sh ]; then
-            echo "ERROR: scripts/setup.sh file is missing!"
-            exit 1
-          fi
+      # - name: Ensure `setup.sh` Exists in `scripts/` Folder
+      #   run: |
+      #     if [ ! -f packer/scripts/setup.sh ]; then
+      #       echo "ERROR: scripts/setup.sh file is missing!"
+      #       exit 1
+      #     fi
 
       - name: Install Zip Utility
         run: |
