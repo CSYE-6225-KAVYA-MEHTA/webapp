@@ -57,7 +57,7 @@ jobs:
             sleep 5;
           done
 
-      # Step 5: Run SQL to create database and user (if needed)
+        #Run SQL to create database and user (if needed)
       - name: Create database and user
         run: |
           mysql --host=127.0.0.1 --port=3306 --user=root --password=root_password -e "
