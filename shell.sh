@@ -24,8 +24,8 @@ sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
  
 echo "-------Securing MySQL Installation and Granting Permissions-------"
 # Fixed: Create the correct user and grant proper permissions
-sudo mysql -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
-sudo mysql -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
+sudo mysql -e "CREATE USER IF NOT EXISTS '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';"
+sudo mysql -e "GRANT ALL PRIVILEGES ON $DB_NAME TO '$DB_USER'@'%';"
 sudo mysql -e "FLUSH PRIVILEGES;"
 
 # Configure MySQL to listen on all interfaces - this helps with connection issues
