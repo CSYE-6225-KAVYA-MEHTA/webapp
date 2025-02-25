@@ -1,0 +1,123 @@
+name: Packer Build
+
+on:
+  push:
+    branches: ["main"] #
+
+jobs:
+  build:
+    name: packer-build
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      SUBNET_ID: ${{ secrets.SUBNET_ID }}
+      SOURCE_AMI: ${{ secrets.SOURCE_AMI }}
+      DEV_USER: ${{ secrets.DEV_USER }}
+      DEMO_USER: ${{ secrets.DEMO_USER }}
+      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY}}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_DATABASE: ${{ secrets.DB_DATABASE }}
+      VPC_ID: ${{ secrets.VPC_ID }}
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
+
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@v2
+        with:
+          version: "1.9.4"
+
+      - name: Setting up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.x"
+
+      - name: Debug Directory Structure Before
+        run: |
+          echo "Current directory structure:"
+          ls -R
+
+      # - name: Create Zip File
+      #   run: |
+      #     # Create zip excluding the packer directory and other unnecessary files
+      #     zip -r webapp.zip . -x "packer/*" "*.git*" "*node_modules*" "*logs*" "*temp*"
+
+      - name: Install Zip Utility
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zip
+
+      - name: Building webapp application artifact
+        run: |
+          zip -r webapp.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*"
+
+      - name: Debug - Check if WebApp Zip File Exists
+        run: |
+          if [ ! -f webapp.zip ]; then
+            echo "ERROR: webapp.zip file is missing!"
+            exit 1
+          fi
+          ls -al webapp.zip
+
+      - name: Upload zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact
+          path: webapp.zip
+      # - name: Move Files to Packer Directory
+      #   run: |
+      #     # Move the zip file to packer directory
+      #     mv webapp.zip
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Debug Directory Structure After
+        run: |
+          echo "Final directory structure:"
+          ls -R
+
+      - name: Initialize Packer
+        working-directory: ./packer
+        run: |
+          packer init .
+          packer fmt -recursive .
+
+      - name: Upload Systemd Service File
+        working-directory: ./packer
+        run: |
+          cp img-creation.service ./packer
+
+      - name: Configure AWS Credentials
+
+        working-directory: ./packer
+        run: |
+
+          echo "Checking if img-creation.pkr.hcl exists in packer directory..."
+          ls -l img-creation.pkr.hcl || { echo "Error: img-creation.pkr.hcl not found"; exit 1; }
+
+          packer build -var-file=variables.pkrvars.hcl img-creation.pkr.hcl
