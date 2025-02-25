@@ -152,7 +152,7 @@ build {
       "DB_USER=${var.db_username}",
       "DB_PASSWORD=${var.db_password}",
       "DB_HOST=${var.db_host}",
-      "PORT=${var.port}"
+      "PORT=${var.port}",
       "EOF"
     ]
   }
