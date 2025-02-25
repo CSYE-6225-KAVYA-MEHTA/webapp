@@ -135,52 +135,89 @@ build {
 
 
   provisioner "file" {
-    source      = "img-creation.service"
-    destination = "/etc/systemd/system/img-creation.service"
-  }
-
-  provisioner "shell" {
-    inline = [
-      "sudo systemctl daemon-reload",
-      "sudo systemctl enable img-creation.service",
-      "sudo systemctl start img-creation.service"
-    ]
+    source      = "../webapp.zip" # Copy the entire webapp codebase
+    destination = "/tmp/webapp.zip"
   }
 
   provisioner "file" {
-    source      = "../webapp.zip"
-    destination = "/tmp/webapp.zip"
-    generated=true
-  }
-
-  provisioner "shell" {
-    script = "scripts/s1.sh"
-  }
-
-  provisioner "shell" {
-    script = "scripts/s2.sh"
-  }
-
-
-  provisioner "shell" {
-    script = "scripts/s3.sh"
-  }
-
-  provisioner "shell" {
-    script = "scripts/s4.sh"
+    source      = "application.service" # Copy the entire webapp codebase
+    destination = "/tmp/application.service"
   }
 
   provisioner "shell" {
     inline = [
-      "export DB_DATABASE=${var.db_database}",
-      "export DB_USERNAME=${var.db_username}",
-      "export DB_PASSWORD=${var.db_password}",
-      "export DB_HOST=${var.db_host}",
-      "export PORT=${var.port}"
+      "echo 'Verifying file transfer...'",
+
+      "echo 'Listing /tmp directory after file provisioner:'",
+      "ls -al /tmp", # List files in /tmp to check if webapp.zip and application.service exist
+
+      "if [ -f /tmp/webapp.zip ]; then echo 'webapp.zip copied successfully!'; else echo 'ERROR: webapp.zip NOT found in /tmp'; exit 1; fi",
+      "if [ -f /tmp/application.service ]; then echo 'application.service copied successfully!'; else echo 'ERROR: application.service NOT found in /tmp'; exit 1; fi",
+
+      "echo 'File verification completed.'",
+
+      "sudo apt-get update -y",
+      "sudo apt-get install -y unzip",
+
+      "echo 'Creating user and group csye6225'",
+      "sudo groupadd csye6225 || echo 'Group already exists'",
+      "sudo useradd -s /bin/false -g csye6225 -d /opt/csye6225 -m csye6225", # Ensure the user and home directory exist
+
+      # Install Node.js
+      "echo '🛠 Installing Node.js v20...'",
+      "sudo apt-get install -y curl",                                      # Install curl if not already installed
+      "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -", # Use Node.js 20 setup script
+      "sudo apt-get install -y nodejs",                                    # Install Node.js 20.x
+      "sudo npm install -g npm@latest",                                    # Install the latest npm version
+
+      "node -v", # Verify Node.js installation
+      "npm -v",  # Verify npm installation
+
+      "echo 'Installing MySQL...'",
+      "sudo apt-get install mysql-server -y",
+      "sudo systemctl start mysql",
+      "sudo systemctl enable mysql",
+
+      "echo 'Creating Database...'",
+      "sudo mysql -e \"CREATE DATABASE IF NOT EXISTS Health_Check;\"",
+      "sudo mysql -e \"CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'root';\"",
+      "sudo mysql -e \"GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;\"",
+      "sudo mysql -e \"FLUSH PRIVILEGES;\"",
+
+      "echo 'Moving application service file...'",
+      "sudo mv /tmp/application.service /etc/systemd/system/",
+      "sudo chmod 644 /etc/systemd/system/application.service",
+
+      "echo 'Creating /opt/csye6225 directory'",
+      "sudo mkdir -p /opt/csye6225",
+      "sudo chown csye6225:csye6225 /opt/csye6225",
+      "sudo chmod 755 /opt/csye6225",
+
+      "echo 'Moving webapp.zip...'",
+      "if [ -f /tmp/webapp.zip ]; then sudo mv /tmp/webapp.zip /opt/csye6225/ && echo 'webapp.zip moved to /opt/csye6225/'; else echo 'Error: /tmp/webapp.zip not found' && ls -l /tmp/ && exit 1; fi",
+
+      "sudo chown -R csye6225:csye6225 /opt/csye6225",
+      "sudo chmod 755 /opt/csye6225/webapp.zip",
+
+      "echo 'Unzipping webapp.zip...'",
+      "cd /opt/csye6225",
+      "sudo unzip webapp.zip",
+      "ls -al",
+
+      "echo 'Setting ownership of files after unzipping'",
+      "sudo chown -R csye6225:csye6225 /opt/csye6225",
+      "sudo chmod -R 755 /opt/csye6225",
+
+      "echo 'Running npm install'",
+      "cd /opt/csye6225",
+      "sudo -u csye6225 npm install",
+
+      "sudo systemctl daemon-reload",
+      "sudo systemctl enable application",
+      "sudo systemctl start application",
+
+      "echo 'Service application started successfully'"
     ]
-  }
-  provisioner "shell" {
-    script = "scripts/s5.sh"
   }
 
   
