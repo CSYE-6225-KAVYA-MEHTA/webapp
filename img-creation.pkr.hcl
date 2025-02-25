@@ -218,7 +218,7 @@ build {
       "sudo chmod 755 /opt/csye6225",
 
       "sudo useradd -g csye6225 -s /usr/sbin/nologin csye6225",
-      "echo "csye6225 ALL=(ALL:ALL) NOPASSWD: /bin/systemctl" | sudo EDITOR='tee -a'visudo",
+      echo "csye6225 ALL=(ALL:ALL) NOPASSWD: /bin/systemctl" | sudo EDITOR='tee -a'visudo,
 
 
       "echo 'Moving webapp.zip...'",
