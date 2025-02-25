@@ -30,9 +30,9 @@ echo "++++++++++++CHECK WHAT IS THE DATABASE NAME?: $DB_DATABASE"
 sudo mysql -u root -e "CREATE database IF NOT EXISTS ${DB_DATABASE};"
  
 echo "-------Securing MySQL Installation and Granting Permissions-------"
-sudo mysql -e "CREATE USER IF NOT EXISTS 'kavya'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';"
+sudo mysql -e "CREATE USER IF NOT EXISTS 'kavya'@'%' IDENTIFIED BY '${DB_PASSWORD}';"
 echo "++++++++++++CHECK WHAT IS THE PASSWORD NAME?: $DB_PASSWORD"
-sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'kavya'@'localhost' WITH GRANT OPTION;"
+sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'kavya'@'%' WITH GRANT OPTION;"
 sudo mysql -e "FLUSH PRIVILEGES;"
 
 
