@@ -150,6 +150,17 @@ build {
 
   provisioner "shell" {
     inline = [
+      "cat <<EOF | sudo tee /opt/csye6225/.env",
+      "DB_NAME=${db_database}",
+      "DB_USER=${db_username}",
+      "DB_PASSWORD=${db_password}",
+      "EOF"
+    ]
+  }
+
+  
+  provisioner "shell" {
+    inline = [
       "echo 'Verifying file transfer...'",
 
       "echo 'Listing /tmp directory after file provisioner:'",
@@ -188,16 +199,6 @@ build {
       "sudo mysql -e \"CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'root';\"",
       "sudo mysql -e \"GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;\"",
       "sudo mysql -e \"FLUSH PRIVILEGES;\"",
-
-
-
-      cat <<EOF | sudo tee /opt/csye6225/.env
-      DB_HOST=localhost
-      DB_PORT=8080
-      DB_NAME=${db_database}
-      DB_USER=${db_username}
-      DB_PASSWORD=${db_password}
-      EOF
 
 
       "echo 'Moving application service file...'",
