@@ -79,19 +79,18 @@ variable "volume_size" {
 
 variable "db_username" {
   type      = string
-  sensitive = true
+
   default   = env("DB_USERNAME")
 }
 
 variable "db_password" {
   type      = string
-  sensitive = true
   default   = env("DB_PASSWORD")
 }
 
 variable "db_database" {
   type      = string
-  sensitive = true
+
   default   = env("DB_DATABASE")
 }
 
@@ -194,11 +193,18 @@ build {
       "sudo systemctl enable mysql",
 
       "echo 'Creating Database...'",
-      "sudo mysql -e \"CREATE DATABASE IF NOT EXISTS Health_Check;\"",
+      "sudo mysql -e \"CREATE DATABASE IF NOT EXISTS ${var.db_database};\"",
       # "sudo mysql -e \"CREATE USER IF NOT EXISTS 'kavya'@'localhost' IDENTIFIED BY 'root';\"",
       "sudo mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';\"",
       "sudo mysql -e \"FLUSH PRIVILEGES;\"",
       "sudo mysql -e \"GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;\"",
+
+      "sudo mysql -e \"FLUSH PRIVILEGES;\"",
+
+
+            # Add the two new lines here:
+      "sudo mysql -e \"CREATE USER IF NOT EXISTS '${var.db_username}'@'localhost' IDENTIFIED BY '${var.db_password}';\"",
+      "sudo mysql -e \"GRANT ALL PRIVILEGES ON ${var.db_database}.* TO '${var.db_username}'@'localhost';\"",
 
       "sudo mysql -e \"FLUSH PRIVILEGES;\"",
 
