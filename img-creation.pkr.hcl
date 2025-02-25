@@ -80,7 +80,7 @@ variable "volume_size" {
 variable "db_username" {
   type = string
 
-  default = "kavya"
+  default = env("DB_USERNAME")
 }
 
 variable "db_password" {
