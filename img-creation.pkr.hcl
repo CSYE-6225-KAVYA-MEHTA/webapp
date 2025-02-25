@@ -135,7 +135,7 @@ build {
 
 
   provisioner "file" {
-    source      = "../webapp.zip" # Copy the entire webapp codebase
+    source      = "./webapp.zip" # Copy the entire webapp codebase
     destination = "/tmp/webapp.zip"
   }
 
@@ -144,6 +144,18 @@ build {
     destination = "/tmp/application.service"
   }
 
+
+  provisioner "shell" {
+    inline = [
+      "cat <<EOF | sudo tee /tmp/.env",
+      "DB_NAME=${var.db_database}",
+      "DB_USER=${var.db_username}",
+      "DB_PASSWORD=${var.db_password}",
+      "EOF"
+    ]
+  }
+
+  
   provisioner "shell" {
     inline = [
       "echo 'Verifying file transfer...'",
@@ -172,6 +184,7 @@ build {
 
       "node -v", # Verify Node.js installation
       "npm -v",  # Verify npm installation
+      "sudo npm install dotenv",
 
       "echo 'Installing MySQL...'",
       "sudo apt-get install mysql-server -y",
@@ -184,6 +197,7 @@ build {
       "sudo mysql -e \"GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;\"",
       "sudo mysql -e \"FLUSH PRIVILEGES;\"",
 
+
       "echo 'Moving application service file...'",
       "sudo mv /tmp/application.service /etc/systemd/system/",
       "sudo chmod 644 /etc/systemd/system/application.service",
@@ -195,6 +209,10 @@ build {
 
       "echo 'Moving webapp.zip...'",
       "if [ -f /tmp/webapp.zip ]; then sudo mv /tmp/webapp.zip /opt/csye6225/ && echo 'webapp.zip moved to /opt/csye6225/'; else echo 'Error: /tmp/webapp.zip not found' && ls -l /tmp/ && exit 1; fi",
+
+
+      "echo 'Moving application service file...'",
+      "sudo mv /tmp/.env /opt/csye6225/",
 
       "sudo chown -R csye6225:csye6225 /opt/csye6225",
       "sudo chmod 755 /opt/csye6225/webapp.zip",

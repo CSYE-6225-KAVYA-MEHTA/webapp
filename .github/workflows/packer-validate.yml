@@ -55,7 +55,6 @@ jobs:
         uses: hashicorp/setup-packer@v2
 
       - name: Packer Initialize and Validate
-        working-directory: ./packer
         run: |
           packer init .
           packer fmt -recursive .
