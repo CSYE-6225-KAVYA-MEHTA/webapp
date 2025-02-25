@@ -80,7 +80,7 @@ variable "volume_size" {
 variable "db_username" {
   type = string
 
-  default ="kavya"
+  default = "kavya"
 }
 
 variable "db_password" {
@@ -156,8 +156,8 @@ build {
     ]
   }
 
-  provisioner "shell"{
-    script="shell.sh"
+  provisioner "shell" {
+    script = "shell.sh"
   }
 
 
