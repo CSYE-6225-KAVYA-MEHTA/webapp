@@ -102,20 +102,19 @@ jobs:
           ls -R
 
       - name: Initialize Packer
-        working-directory: ./packer
+
         run: |
           packer init .
           packer fmt -recursive .
 
       - name: Upload Systemd Service File
-        working-directory: ./packer
+
         run: |
 
           cp application.service ./packer
 
       - name: Configure AWS Credentials
 
-        working-directory: ./packer
         run: |
 
           echo "Checking if img-creation.pkr.hcl exists in packer directory..."
