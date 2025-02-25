@@ -6,7 +6,7 @@ sudo apt install -y curl
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - 
 sudo apt install -y nodejs
 sudo apt-get install -y mysql-server
-sudo node -v
+echo"Installed MYSQL"
 sudo npm -v
 npm install dotenv
 
@@ -25,14 +25,15 @@ sudo groupadd csye6225
 # sudo mysql -e "FLUSH PRIVILEGES;"
 
 
-CREATE USER IF NOT EXISTS 'kavya'@'localhost' IDENTIFIED BY 'root';
-# ALTER USER 'kavya'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
-# FLUSH PRIVILEGES;
-CREATE DATABASE Health_Check;
-GRANT ALL PRIVILEGES ON *.* TO 'kavya'@'$localhost' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-sudo sed -i 's/^bind-address\s*=.*/bind-address = 0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf
-sudo systemctl restart mysql
+echo "-------Creating Database-------"
+echo "++++++++++++CHECK WHAT IS THE DATABASE NAME?: $DB_DATABASE"
+sudo mysql -u root -e "CREATE database IF NOT EXISTS ${DB_DATABASE};"
+ 
+echo "-------Securing MySQL Installation and Granting Permissions-------"
+sudo mysql -e "CREATE USER IF NOT EXISTS 'kavya'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';"
+echo "++++++++++++CHECK WHAT IS THE PASSWORD NAME?: $DB_PASSWORD"
+sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'kavya'@'localhost' WITH GRANT OPTION;"
+sudo mysql -e "FLUSH PRIVILEGES;"
 
 
 
