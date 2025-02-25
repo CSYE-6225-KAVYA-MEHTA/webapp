@@ -25,10 +25,15 @@ sudo groupadd csye6225
 # sudo mysql -e "FLUSH PRIVILEGES;"
 
 
-echo "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$DB_PASSWORD'; 
-FLUSH PRIVILEGES; 
-CREATE DATABASE Health_Check;" | sudo mysql
-# Created db
+CREATE USER IF NOT EXISTS 'kavya'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
+ALTER USER 'kavya'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
+FLUSH PRIVILEGES;
+CREATE DATABASE Health_Check;
+GRANT ALL PRIVILEGES ON Health_Check.* TO 'kavya'@'localhost';
+FLUSH PRIVILEGES;
+
+
+
 
 sudo cp /tmp/application.service /etc/systemd/system/
 sudo cp /tmp/webapp.zip /opt/
