@@ -195,8 +195,8 @@ build {
 
       "echo 'Creating Database...'",
       "sudo mysql -e \"CREATE DATABASE IF NOT EXISTS Health_Check;\"",
-      "sudo mysql -e \"CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'root';\"",
-      "sudo mysql -e \"GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;\"",
+      "sudo mysql -e \"CREATE USER IF NOT EXISTS 'kavya'@'localhost' IDENTIFIED BY 'root';\"",
+      "sudo mysql -e \"GRANT ALL PRIVILEGES ON *.* TO 'kavya'@'localhost' WITH GRANT OPTION;\"",
       "sudo mysql -e \"FLUSH PRIVILEGES;\"",
 
       # Update MySQL bind-address to allow remote connections
