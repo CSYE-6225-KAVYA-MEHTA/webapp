@@ -156,92 +156,99 @@ build {
     ]
   }
 
-  provisioner "shell" {
-    inline = [
-      "echo 'Verifying file transfer...'",
-
-      "echo 'Listing /tmp directory after file provisioner:'",
-      "ls -al /tmp", # List files in /tmp to check if webapp.zip and application.service exist
-
-      "if [ -f /tmp/webapp.zip ]; then echo 'webapp.zip copied successfully!'; else echo 'ERROR: webapp.zip NOT found in /tmp'; exit 1; fi",
-      "if [ -f /tmp/application.service ]; then echo 'application.service copied successfully!'; else echo 'ERROR: application.service NOT found in /tmp'; exit 1; fi",
-
-      "echo 'File verification completed.'",
-
-      "sudo apt-get update -y",
-      "sudo apt-get install -y unzip",
-
-      "echo 'Creating user and group csye6225'",
-      "sudo groupadd csye6225 || echo 'Group already exists'",
-      "sudo useradd -s /bin/false -g csye6225 -d /opt/csye6225 -m csye6225", # Ensure the user and home directory exist
-
-      # Install Node.js
-      "echo '🛠 Installing Node.js v20...'",
-      "sudo apt-get install -y curl",                                      # Install curl if not already installed
-      "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -", # Use Node.js 20 setup script
-      "sudo apt-get install -y nodejs",                                    # Install Node.js 20.x
-      "sudo npm install -g npm@latest",                                    # Install the latest npm version
-
-      "node -v", # Verify Node.js installation
-      "npm -v",  # Verify npm installation
-      "sudo npm install dotenv",
-
-      "echo 'Installing MySQL...'",
-      "sudo apt-get install mysql-server -y",
-      "sudo systemctl start mysql",
-      "sudo systemctl enable mysql",
-
-      "echo 'Creating Database...'",
-      "sudo mysql -e \"CREATE DATABASE IF NOT EXISTS Health_Check;\"",
-      "sudo mysql -e \"CREATE USER IF NOT EXISTS 'kavya'@'localhost' IDENTIFIED BY 'root';\"",
-      "sudo mysql -e \"GRANT ALL PRIVILEGES ON *.* TO 'kavya'@'localhost' WITH GRANT OPTION;\"",
-      "sudo mysql -e \"FLUSH PRIVILEGES;\"",
-
-      # Update MySQL bind-address to allow remote connections
-      "sudo sed -i 's/^bind-address\\s*=.*/bind-address = 0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf",
-
-
-      "sudo systemctl restart mysql",
-
-
-      "echo 'Moving application service file...'",
-      "sudo mv /tmp/application.service /etc/systemd/system/",
-      "sudo chmod 644 /etc/systemd/system/application.service",
-
-      "echo 'Creating /opt/csye6225 directory'",
-      "sudo mkdir -p /opt/csye6225",
-      "sudo chown csye6225:csye6225 /opt/csye6225",
-      "sudo chmod 755 /opt/csye6225",
-
-      "echo 'Moving webapp.zip...'",
-      "if [ -f /tmp/webapp.zip ]; then sudo mv /tmp/webapp.zip /opt/csye6225/ && echo 'webapp.zip moved to /opt/csye6225/'; else echo 'Error: /tmp/webapp.zip not found' && ls -l /tmp/ && exit 1; fi",
-
-
-      "echo 'Moving application service file...'",
-      "sudo mv /tmp/.env /opt/csye6225/",
-
-      "sudo chown -R csye6225:csye6225 /opt/csye6225",
-      "sudo chmod 755 /opt/csye6225/webapp.zip",
-
-      "echo 'Unzipping webapp.zip...'",
-      "cd /opt/csye6225",
-      "sudo unzip webapp.zip",
-      "ls -al",
-
-      "echo 'Setting ownership of files after unzipping'",
-      "sudo chown -R csye6225:csye6225 /opt/csye6225",
-      "sudo chmod -R 755 /opt/csye6225",
-
-      "echo 'Running npm install'",
-      "cd /opt/csye6225",
-      "sudo -u csye6225 npm install",
-
-      "sudo systemctl daemon-reload",
-      "sudo systemctl enable application",
-      "sudo systemctl start application",
-
-      "echo 'Service application started successfully'"
-    ]
+  provisioner "shell"{
+    script="shell.sh"
   }
+
+#   provisioner "shell" {
+#     inline = [
+#       "echo 'Verifying file transfer...'",
+
+#       "echo 'Listing /tmp directory after file provisioner:'",
+#       "ls -al /tmp", # List files in /tmp to check if webapp.zip and application.service exist
+
+#       "if [ -f /tmp/webapp.zip ]; then echo 'webapp.zip copied successfully!'; else echo 'ERROR: webapp.zip NOT found in /tmp'; exit 1; fi",
+#       "if [ -f /tmp/application.service ]; then echo 'application.service copied successfully!'; else echo 'ERROR: application.service NOT found in /tmp'; exit 1; fi",
+
+#       "echo 'File verification completed.'",
+
+#       "sudo apt-get update -y",
+#       "sudo apt-get install -y unzip",
+
+#       "echo 'Creating user and group csye6225'",
+#       "sudo groupadd csye6225 || echo 'Group already exists'",
+#       "sudo useradd -s /bin/false -g csye6225 -d /opt/csye6225 -m csye6225", # Ensure the user and home directory exist
+
+#       # Install Node.js
+#       "echo 'Installing Node.js v20...'",
+#       "sudo apt-get install -y curl",                                      # Install curl if not already installed
+#       "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -", # Use Node.js 20 setup script
+#       "sudo apt-get install -y nodejs",                                    # Install Node.js 20.x
+#       "sudo npm install -g npm@latest",                                    # Install the latest npm version
+
+#       "node -v", # Verify Node.js installation
+#       "npm -v",  # Verify npm installation
+#       "sudo npm install dotenv",
+# #
+#       "echo 'Installing MySQL...'",
+#       "sudo apt-get install mysql-server -y",
+#       "sudo systemctl start mysql",
+#       "sudo systemctl enable mysql",
+
+#       "echo "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$DB_PASSWORD';FLUSH PRIVILEGES;CREATE DATABASE cloudAppcsy6225;| sudo mysql",
+
+
+
+#       # "echo 'Creating Database...'",
+#       # "sudo mysql -e \"CREATE DATABASE IF NOT EXISTS Health_Check;\"",
+#       # "sudo mysql -e \"CREATE USER IF NOT EXISTS 'kavya'@'localhost' IDENTIFIED BY 'root';\"",
+#       # "sudo mysql -e \"GRANT ALL PRIVILEGES ON *.* TO 'kavya'@'localhost' WITH GRANT OPTION;\"",
+#       # "sudo mysql -e \"FLUSH PRIVILEGES;\"",
+
+
+
+
+#       "sudo systemctl restart mysql",
+
+
+#       "echo 'Moving application service file...'",
+#       "sudo mv /tmp/application.service /etc/systemd/system/",
+#       "sudo chmod 644 /etc/systemd/system/application.service",
+
+#       "echo 'Creating /opt/csye6225 directory'",
+#       "sudo mkdir -p /opt/csye6225",
+#       "sudo chown csye6225:csye6225 /opt/csye6225",
+#       "sudo chmod 755 /opt/csye6225",
+
+#       "echo 'Moving webapp.zip...'",
+#       "if [ -f /tmp/webapp.zip ]; then sudo mv /tmp/webapp.zip /opt/csye6225/ && echo 'webapp.zip moved to /opt/csye6225/'; else echo 'Error: /tmp/webapp.zip not found' && ls -l /tmp/ && exit 1; fi",
+
+
+#       "echo 'Moving application service file...'",
+#       "sudo mv /tmp/.env /opt/csye6225/",
+
+#       "sudo chown -R csye6225:csye6225 /opt/csye6225",
+#       "sudo chmod 755 /opt/csye6225/webapp.zip",
+
+#       "echo 'Unzipping webapp.zip...'",
+#       "cd /opt/csye6225",
+#       "sudo unzip webapp.zip",
+#       "ls -al",
+
+#       "echo 'Setting ownership of files after unzipping'",
+#       "sudo chown -R csye6225:csye6225 /opt/csye6225",
+#       "sudo chmod -R 755 /opt/csye6225",
+
+#       "echo 'Running npm install'",
+#       "cd /opt/csye6225",
+#       "sudo -u csye6225 npm install",
+
+#       "sudo systemctl daemon-reload",
+#       "sudo systemctl enable application",
+#       "sudo systemctl start application",
+
+#       "echo 'Service application started successfully'"
+#     ]
+#   }
 
 }
