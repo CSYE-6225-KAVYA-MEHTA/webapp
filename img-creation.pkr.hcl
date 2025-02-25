@@ -97,12 +97,12 @@ variable "db_database" {
 
 variable "db_host" {
   type    = string
-  default = env("DB_HOST")
+  default = "localhost"
 }
 
 variable "port" {
   type    = string
-  default = env("PORT")
+  default = "8080"
 }
 
 source "amazon-ebs" "ubuntu" {
@@ -198,6 +198,12 @@ build {
       "sudo mysql -e \"CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'root';\"",
       "sudo mysql -e \"GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;\"",
       "sudo mysql -e \"FLUSH PRIVILEGES;\"",
+
+      # Update MySQL bind-address to allow remote connections
+      "sudo sed -i 's/^bind-address\\s*=.*/bind-address = 0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf",
+
+
+      "sudo systemctl restart mysql",
 
 
       "echo 'Moving application service file...'",
