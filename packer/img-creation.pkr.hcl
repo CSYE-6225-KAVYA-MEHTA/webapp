@@ -133,6 +133,20 @@ source "amazon-ebs" "ubuntu" {
 build {
   sources = ["source.amazon-ebs.ubuntu"]
 
+
+  provisioner "file" {
+    source      = "img-creation.service"
+    destination = "/etc/systemd/system/img-creation.service"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "sudo systemctl daemon-reload",
+      "sudo systemctl enable img-creation.service",
+      "sudo systemctl start img-creation.service"
+    ]
+  }
+
   provisioner "file" {
     source      = "../webapp.zip"
     destination = "/tmp/webapp.zip"

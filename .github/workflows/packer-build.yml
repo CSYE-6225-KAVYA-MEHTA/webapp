@@ -107,6 +107,10 @@ jobs:
           packer init .
           packer fmt -recursive .
 
+      - name: Upload Systemd Service File
+        run: |
+          cp img-creation.service packer/
+
       - name: Configure AWS Credentials
 
         working-directory: ./packer

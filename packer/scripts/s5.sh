@@ -8,3 +8,7 @@ sudo -u CSYE_6225_USER npm install --unsafe-perm || { echo "ERROR: npm install f
 
 echo "Starting the application..."
 sudo -u CSYE_6225_USER npm start || { echo "ERROR: npm start failed"; exit 1; }
+
+
+echo "Checking img-creation service status..."
+sudo systemctl status img-creation.service || { echo "ERROR: Service failed to start"; exit 1; }
