@@ -156,6 +156,10 @@ build {
     ]
   }
 
+  provisioner "shell"{
+    script=shell.sh
+  }
+
 #   provisioner "shell" {
 #     inline = [
 #       "echo 'Verifying file transfer...'",
