@@ -97,12 +97,12 @@ variable "db_database" {
 
 variable "db_host" {
   type    = string
-  default = localhost
+  default = "localhost"
 }
 
 variable "port" {
   type    = string
-  default = 8080
+  default = "8080"
 }
 
 source "amazon-ebs" "ubuntu" {
