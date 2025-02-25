@@ -108,6 +108,7 @@ jobs:
           packer fmt -recursive .
 
       - name: Upload Systemd Service File
+        working-directory: ./packer
         run: |
           cp img-creation.service packer/
 
