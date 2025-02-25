@@ -4,7 +4,7 @@ const { app } = require("./app.js"); // Change this if needed based on your .env
 describe("API Tests", () => {
   const methods = ["post", "put", "delete", "patch", "head", "options"];
 
-  test("GET /healthz should return 200", async () => {
+  test("GET /healthz should return 201", async () => {
     const response = await request(app).get("/healthz");
     expect(response.statusCode).toBe(200);
   });
