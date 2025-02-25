@@ -80,7 +80,7 @@ variable "volume_size" {
 variable "db_username" {
   type = string
 
-  default = env("DB_USERNAME")
+  default ="kavya"
 }
 
 variable "db_password" {
@@ -159,7 +159,6 @@ build {
   provisioner "shell"{
     script="shell.sh"
   }
-
 
 
 }
