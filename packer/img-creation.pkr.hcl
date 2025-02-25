@@ -134,7 +134,7 @@ build {
   sources = ["source.amazon-ebs.ubuntu"]
 
   provisioner "file" {
-    source      = "./.env" # Copy the entire webapp codebase
+    source      = ".env" # Copy the entire webapp codebase
     destination = "/tmp/.env"
   }
 
@@ -176,6 +176,7 @@ build {
 
       "node -v", # Verify Node.js installation
       "npm -v",  # Verify npm installation
+      "sudo npm install dotenv"
 
       "echo 'Installing MySQL...'",
       "sudo apt-get install mysql-server -y",
@@ -187,6 +188,17 @@ build {
       "sudo mysql -e \"CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'root';\"",
       "sudo mysql -e \"GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;\"",
       "sudo mysql -e \"FLUSH PRIVILEGES;\"",
+
+
+
+      cat <<EOF | sudo tee /opt/csye6225/.env
+      DB_HOST=localhost
+      DB_PORT=8080
+      DB_NAME=${db_database}
+      DB_USER=${db_username}
+      DB_PASSWORD=${db_password}
+      EOF
+
 
       "echo 'Moving application service file...'",
       "sudo mv /tmp/application.service /etc/systemd/system/",
