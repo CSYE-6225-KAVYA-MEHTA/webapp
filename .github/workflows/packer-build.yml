@@ -111,8 +111,7 @@ jobs:
         working-directory: ./packer
         run: |
 
-          cp img-creation.service ./packer
-
+          cp application.service ./packer
 
       - name: Configure AWS Credentials
 
