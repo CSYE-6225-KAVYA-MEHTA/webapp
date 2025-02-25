@@ -134,7 +134,7 @@ build {
   sources = ["source.amazon-ebs.ubuntu"]
 
   provisioner "file" {
-    source      = ".env" # Copy the entire webapp codebase
+    source      = "/.env" # Copy the entire webapp codebase
     destination = "/tmp/.env"
   }
 
@@ -151,7 +151,7 @@ build {
   provisioner "shell" {
     inline = [
       "cat <<EOF | sudo tee /opt/csye6225/.env",
-      "DB_NAME=${db_database}",
+      "DB_NAME=env("DB_DATABASE")",
       "DB_USER=${db_username}",
       "DB_PASSWORD=${db_password}",
       "EOF"
