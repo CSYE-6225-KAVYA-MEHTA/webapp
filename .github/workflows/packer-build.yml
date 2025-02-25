@@ -107,14 +107,7 @@ jobs:
           packer init .
           packer fmt -recursive .
 
-      - name: Upload Systemd Service File
-
-        run: |
-
-          cp application.service ./packer
-
       - name: Configure AWS Credentials
-
         run: |
 
           echo "Checking if img-creation.pkr.hcl exists in packer directory..."
