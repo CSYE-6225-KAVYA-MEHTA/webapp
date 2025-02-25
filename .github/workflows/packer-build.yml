@@ -18,9 +18,9 @@ jobs:
       AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY}}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
       SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
-      DB_USERNAME: ${{ secrets.DB_USER }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_DATABASE: ${{ secrets.DB_NAME }}
+      DB_DATABASE: ${{ secrets.DB_DATABASE }}
       VPC_ID: ${{ secrets.VPC_ID }}
 
     services:
@@ -111,10 +111,9 @@ jobs:
 
         run: |
 
-          cp application.service
+          cp application.service ./
 
       - name: Configure AWS Credentials
-
         run: |
 
           echo "Checking if img-creation.pkr.hcl exists in packer directory..."
