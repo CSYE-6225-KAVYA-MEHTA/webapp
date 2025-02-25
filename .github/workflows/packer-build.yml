@@ -57,7 +57,7 @@ jobs:
             sleep 5;
           done
 
-      # Step 5: Run SQL to create database and user (if needed)
+        #Run SQL to create database and user (if needed)
       - name: Create database and user
         run: |
           mysql --host=127.0.0.1 --port=3306 --user=root --password=root_password -e "
@@ -109,7 +109,7 @@ jobs:
           ls
           pwd
           cd src
-          packer init aws-ubuntu.pkr.hcl
+          packer init img-creation.pkr.hcl
            packer build \
             -var 'db_name=${{ secrets.DB_DATABASE }}' \
             -var 'db_user=${{ secrets.DB_USER }}' \
