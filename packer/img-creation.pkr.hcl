@@ -136,6 +136,24 @@ build {
   provisioner "file" {
     source      = "../webapp.zip"
     destination = "/tmp/webapp.zip"
+    generated=true
+  }
+
+  provisioner "shell" {
+    script = "scripts/s1.sh"
+  }
+
+  provisioner "shell" {
+    script = "scripts/s2.sh"
+  }
+
+
+  provisioner "shell" {
+    script = "scripts/s3.sh"
+  }
+
+  provisioner "shell" {
+    script = "scripts/s4.sh"
   }
 
   provisioner "shell" {
@@ -147,23 +165,9 @@ build {
       "export PORT=${var.port}"
     ]
   }
-
-  # provisioner "shell"{
-  #   source ="scripts/setup.sh"
-  # }
-
-
   provisioner "shell" {
-    script = "scripts/setup.sh"
+    script = "scripts/s5.sh"
   }
 
-  # provisioner "shell" {
-  #   inline = [
-  #     "sudo apt-get update",
-  #     "sudo apt-get install -y mysql-server",
-  #     "sudo systemctl daemon-reload",
-  #     "sudo systemctl enable mysql",
-  #     "sudo systemctl start mysql"
-  #   ]
-  # }
+  
 }
