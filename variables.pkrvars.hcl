@@ -3,7 +3,12 @@ AWS_SECRET_KEY="/znBFzYKZ4xZEiuFoP8uqFGNWvd/jaRNReMpVw2I"
 aws_region        = "us-east-1"
 subnet_id         = "subnet-08d27cf78fa1b9164"
 source_ami        = "ami-04b4f1a9cf54c11d0"
-security_group_id = "sg-02578332a57774942"
+security_group_id = "sg-028dcf8c0865becc6"
 vpc_id            = "vpc-047cf1baaf97b19cc"
 dev_user          = "248189920505"
 demo_user         = "699475940666"
+
+
+db_database       = "Health_Check"
+db_user_name       = "kavya"
+db_password       = "root"
