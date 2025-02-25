@@ -135,7 +135,7 @@ build {
 
 
   provisioner "file" {
-    source      = "webapp.zip" # Copy the entire webapp codebase
+    source      = "../webapp.zip" # Copy the entire webapp codebase
     destination = "/tmp/webapp.zip"
   }
 
