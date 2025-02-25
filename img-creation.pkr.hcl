@@ -193,20 +193,15 @@ build {
       "sudo systemctl enable mysql",
 
       "echo 'Creating Database...'",
-      "sudo mysql -e \"CREATE DATABASE IF NOT EXISTS ${var.db_database};\"",
-      # "sudo mysql -e \"CREATE USER IF NOT EXISTS 'kavya'@'localhost' IDENTIFIED BY 'root';\"",
-      "sudo mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';\"",
-      "sudo mysql -e \"FLUSH PRIVILEGES;\"",
-      "sudo mysql -e \"GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;\"",
+      "sudo mysql -u root -e \"CREATE DATABASE IF NOT EXISTS Health_Check;\"",
+      "sudo mysql -u root -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';\"",
+      "sudo mysql -u root -e \"FLUSH PRIVILEGES;\"",
 
-      "sudo mysql -e \"FLUSH PRIVILEGES;\"",
-
-
-            # Add the two new lines here:
-      "sudo mysql -e \"CREATE USER IF NOT EXISTS '${var.db_username}'@'localhost' IDENTIFIED BY '${var.db_password}';\"",
-      "sudo mysql -e \"GRANT ALL PRIVILEGES ON ${var.db_database}.* TO '${var.db_username}'@'localhost';\"",
-
-      "sudo mysql -e \"FLUSH PRIVILEGES;\"",
+      # Now after root is configured, we can use it with password
+      "sudo mysql -u root -proot -e \"CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'root';\"",
+      "sudo mysql -u root -proot -e \"GRANT ALL PRIVILEGES ON $Health_Check.* TO 'root'@'localhost';\"",
+      "sudo mysql -u root -proot -e \"GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;\"",
+      "sudo mysql -u root -proot -e \"FLUSH PRIVILEGES;\"",
 
       # Update MySQL bind-address to allow remote connections
       "sudo sed -i 's/^bind-address\\s*=.*/bind-address = 0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf",
