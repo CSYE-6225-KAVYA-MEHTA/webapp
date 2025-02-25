@@ -14,16 +14,21 @@ npm install express sequelize mysql2 dotenv
 sudo groupadd csye6225
 
 
-echo "-------Creating Database-------"
-echo "++++++++++++CHECK WHAT IS THE DATABASE NAME?: $DB_DATABASE"
-sudo mysql -u root -e "CREATE database IF NOT EXISTS ${DB_DATABASE};"
+# echo "-------Creating Database-------"
+# echo "++++++++++++CHECK WHAT IS THE DATABASE NAME?: $DB_DATABASE"
+# sudo mysql -u root -e "CREATE database IF NOT EXISTS ${DB_DATABASE};"
  
-echo "-------Securing MySQL Installation and Granting Permissions-------"
-sudo mysql -e "CREATE USER IF NOT EXISTS '${DB_USERNAME}'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';"
-echo ""++++++++++++CHECK WHAT IS THE USERNAME NAME?: $DB_USERNAME"
-echo ""++++++++++++CHECK WHAT IS THE PASSWORD NAME?: $DB_PASSWORD"
-sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO '${DB_USERNAME}'@'localhost' WITH GRANT OPTION;"
-sudo mysql -e "FLUSH PRIVILEGES;"
+# echo "-------Securing MySQL Installation and Granting Permissions-------"
+# sudo mysql -e "CREATE USER IF NOT EXISTS '${DB_USERNAME}'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';"
+# echo ""++++++++++++CHECK WHAT IS THE USERNAME NAME?: $DB_USERNAME"
+# echo ""++++++++++++CHECK WHAT IS THE PASSWORD NAME?: $DB_PASSWORD"
+# sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO '${DB_USERNAME}'@'localhost' WITH GRANT OPTION;"
+# sudo mysql -e "FLUSH PRIVILEGES;"
+
+
+echo "ALTER USER '$DB_USERNAME'@'localhost' IDENTIFIED WITH mysql_native_password BY '$DB_PASSWORD'; 
+FLUSH PRIVILEGES; 
+CREATE DATABASE Health_Check;" | sudo mysql
 
 
 sudo cp /tmp/application.service /etc/systemd/system/
