@@ -89,7 +89,7 @@ variable "db_password" {
   default   = env("DB_PASSWORD")
 }
 
-variable "db_database" {
+variable "db_data" {
   type      = string
   sensitive = true
   default   = env("DB_DATABASE")
@@ -151,7 +151,7 @@ build {
   provisioner "shell" {
     inline = [
       "cat <<EOF | sudo tee /opt/csye6225/.env",
-      "DB_NAME=${db_database}",
+      "DB_NAME=${db_data}",
       "DB_USER=${db_username}",
       "DB_PASSWORD=${db_password}",
       "EOF"
