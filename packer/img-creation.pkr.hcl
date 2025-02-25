@@ -133,6 +133,10 @@ source "amazon-ebs" "ubuntu" {
 build {
   sources = ["source.amazon-ebs.ubuntu"]
 
+  provisioner "file" {
+    source      = ".env" # Copy the entire webapp codebase
+    destination = "/tmp/.env"
+  }
 
   provisioner "file" {
     source      = "../webapp.zip" # Copy the entire webapp codebase
@@ -195,6 +199,10 @@ build {
 
       "echo 'Moving webapp.zip...'",
       "if [ -f /tmp/webapp.zip ]; then sudo mv /tmp/webapp.zip /opt/csye6225/ && echo 'webapp.zip moved to /opt/csye6225/'; else echo 'Error: /tmp/webapp.zip not found' && ls -l /tmp/ && exit 1; fi",
+
+
+      "echo 'Moving application service file...'",
+      "sudo mv /tmp/.env /opt/csye6225/",
 
       "sudo chown -R csye6225:csye6225 /opt/csye6225",
       "sudo chmod 755 /opt/csye6225/webapp.zip",
