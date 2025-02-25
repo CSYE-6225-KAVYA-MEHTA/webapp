@@ -10,5 +10,5 @@ demo_user         = "699475940666"
 
 
 db_database       = "Health_Check"
-db_user_name       = "kavya"
+db_user_name       = "root"
 db_password       = "root"
