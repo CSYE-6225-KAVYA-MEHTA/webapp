@@ -134,12 +134,12 @@ build {
   sources = ["source.amazon-ebs.ubuntu"]
 
   provisioner "file" {
-    source      = "/.env" # Copy the entire webapp codebase
+    source      = "./.env" # Copy the entire webapp codebase
     destination = "/tmp/.env"
   }
 
   provisioner "file" {
-    source      = "../webapp.zip" # Copy the entire webapp codebase
+    source      = "./webapp.zip" # Copy the entire webapp codebase
     destination = "/tmp/webapp.zip"
   }
 
@@ -147,6 +147,7 @@ build {
     source      = "application.service" # Copy the entire webapp codebase
     destination = "/tmp/application.service"
   }
+
 
   provisioner "shell" {
     inline = [
