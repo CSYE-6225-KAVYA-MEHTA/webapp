@@ -176,7 +176,7 @@ build {
       "sudo useradd -s /bin/false -g csye6225 -d /opt/csye6225 -m csye6225", # Ensure the user and home directory exist
 
       # Install Node.js
-      "echo '🛠 Installing Node.js v20...'",
+      "echo 'Installing Node.js v20...'",
       "sudo apt-get install -y curl",                                      # Install curl if not already installed
       "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -", # Use Node.js 20 setup script
       "sudo apt-get install -y nodejs",                                    # Install Node.js 20.x
