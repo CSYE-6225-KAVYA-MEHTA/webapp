@@ -13,12 +13,12 @@ npm install dotenv
 npm install express sequelize mysql2 dotenv
 sudo groupadd csye6225
 
-echo "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$DB_PASSWORD'; 
+echo "ALTER USER 'kavya'@'localhost' IDENTIFIED WITH mysql_native_password BY '$DB_PASSWORD'; 
 FLUSH PRIVILEGES; 
-CREATE DATABASE cloudAppcsy6225;" | sudo mysql
+CREATE DATABASE Health_Check;" | sudo mysql
 
 
-sudo cp /tmp/csye6225-aws.service /etc/systemd/system/
+sudo cp /tmp/application.service /etc/systemd/system/
 sudo cp /tmp/webapp.zip /opt/
 sudo unzip /opt/webapp.zip -d /opt/webapp
 sudo cp /tmp/.env /opt/webapp
