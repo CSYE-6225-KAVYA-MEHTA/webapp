@@ -156,7 +156,7 @@ build {
     ]
   }
 
-  provisioner "file"{
+  provisioner "shell"{
     script="shell.sh"
   }
 
