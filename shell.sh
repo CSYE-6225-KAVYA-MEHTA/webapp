@@ -25,11 +25,11 @@ sudo groupadd csye6225
 # sudo mysql -e "FLUSH PRIVILEGES;"
 
 
-CREATE USER IF NOT EXISTS 'kavya'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
-ALTER USER 'kavya'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
-FLUSH PRIVILEGES;
+CREATE USER IF NOT EXISTS 'kavya'@'localhost' IDENTIFIED BY 'root';
+# ALTER USER 'kavya'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
+# FLUSH PRIVILEGES;
 CREATE DATABASE Health_Check;
-GRANT ALL PRIVILEGES ON Health_Check.* TO 'kavya'@'localhost';
+GRANT ALL PRIVILEGES ON *.* TO 'kavya'@'$localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 sudo sed -i 's/^bind-address\s*=.*/bind-address = 0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf
 sudo systemctl restart mysql
