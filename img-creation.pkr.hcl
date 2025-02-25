@@ -78,20 +78,20 @@ variable "volume_size" {
 }
 
 variable "db_username" {
-  type      = string
+  type = string
 
-  default   = env("DB_USERNAME")
+  default = env("DB_USERNAME")
 }
 
 variable "db_password" {
-  type      = string
-  default   = env("DB_PASSWORD")
+  type    = string
+  default = env("DB_PASSWORD")
 }
 
 variable "db_database" {
-  type      = string
+  type = string
 
-  default   = env("DB_DATABASE")
+  default = env("DB_DATABASE")
 }
 
 variable "db_host" {
@@ -156,7 +156,6 @@ build {
     ]
   }
 
-  
   provisioner "shell" {
     inline = [
       "echo 'Verifying file transfer...'",
@@ -193,15 +192,10 @@ build {
       "sudo systemctl enable mysql",
 
       "echo 'Creating Database...'",
-      "sudo mysql -u root -e \"CREATE DATABASE IF NOT EXISTS Health_Check;\"",
-      "sudo mysql -u root -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';\"",
-      "sudo mysql -u root -e \"FLUSH PRIVILEGES;\"",
-
-      # Now after root is configured, we can use it with password
-      "sudo mysql -u root -proot -e \"CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'root';\"",
-      "sudo mysql -u root -proot -e \"GRANT ALL PRIVILEGES ON $Health_Check.* TO 'root'@'localhost';\"",
-      "sudo mysql -u root -proot -e \"GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;\"",
-      "sudo mysql -u root -proot -e \"FLUSH PRIVILEGES;\"",
+      "sudo mysql -e \"CREATE DATABASE IF NOT EXISTS Health_Check;\"",
+      "sudo mysql -e \"CREATE USER IF NOT EXISTS 'kavya'@'localhost' IDENTIFIED BY 'root';\"",
+      "sudo mysql -e \"GRANT ALL PRIVILEGES ON *.* TO 'kavya'@'localhost' WITH GRANT OPTION;\"",
+      "sudo mysql -e \"FLUSH PRIVILEGES;\"",
 
       # Update MySQL bind-address to allow remote connections
       "sudo sed -i 's/^bind-address\\s*=.*/bind-address = 0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf",
@@ -218,10 +212,6 @@ build {
       "sudo mkdir -p /opt/csye6225",
       "sudo chown csye6225:csye6225 /opt/csye6225",
       "sudo chmod 755 /opt/csye6225",
-
-      "sudo useradd -g csye6225 -s /usr/sbin/nologin csye6225",
-      "echo \"csye6225 ALL=(ALL:ALL) NOPASSWD: /bin/systemctl\" | sudo EDITOR=\"tee -a\" visudo",
-
 
       "echo 'Moving webapp.zip...'",
       "if [ -f /tmp/webapp.zip ]; then sudo mv /tmp/webapp.zip /opt/csye6225/ && echo 'webapp.zip moved to /opt/csye6225/'; else echo 'Error: /tmp/webapp.zip not found' && ls -l /tmp/ && exit 1; fi",
@@ -254,5 +244,4 @@ build {
     ]
   }
 
-  
 }

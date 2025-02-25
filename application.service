@@ -1,13 +1,21 @@
 [Unit]
-Description=Node JS Application Service
+Description=Node.js Application
+ConditionPathExists=/opt/csye6225/.env
 After=network.target
 
+
 [Service]
+EnvironmentFile=/opt/csye6225/.env
+Type=simple
 User=csye6225
-WorkingDirectory=/opt/csye6225
-ExecStart=/usr/bin/npm run start
+Group=csye6225
+WorkingDirectory=/opt/csye6225/
+EnvironmentFile=/opt/csye6225/.env
+ExecStartPre=/usr/bin/npm install
+ExecStart=/usr/bin/node /opt/csye6225/app.js
 Restart=always
+RestartSec=3
+
 
 [Install]
 WantedBy=multi-user.target
-WantedBy=cloud-init.target
