@@ -176,7 +176,7 @@ build {
 
       "node -v", # Verify Node.js installation
       "npm -v",  # Verify npm installation
-      "sudo npm install dotenv"
+      "sudo npm install dotenv",
 
       "echo 'Installing MySQL...'",
       "sudo apt-get install mysql-server -y",
