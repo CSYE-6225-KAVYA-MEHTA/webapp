@@ -14,7 +14,6 @@ npm install express sequelize mysql2 dotenv
 sudo groupadd csye6225
 
 
-# echo "-------Creating Database-------"
 # echo "++++++++++++CHECK WHAT IS THE DATABASE NAME?: $DB_DATABASE"
 # sudo mysql -u root -e "CREATE database IF NOT EXISTS ${DB_DATABASE};"
  
@@ -26,10 +25,10 @@ sudo groupadd csye6225
 # sudo mysql -e "FLUSH PRIVILEGES;"
 
 
-echo "ALTER USER '$DB_USERNAME'@'localhost' IDENTIFIED WITH mysql_native_password BY '$DB_PASSWORD'; 
+echo "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$DB_PASSWORD'; 
 FLUSH PRIVILEGES; 
 CREATE DATABASE Health_Check;" | sudo mysql
-
+# Created db
 
 sudo cp /tmp/application.service /etc/systemd/system/
 sudo cp /tmp/webapp.zip /opt/
