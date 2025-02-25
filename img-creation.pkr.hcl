@@ -9,23 +9,23 @@ packer {
 
 variable "ami_users" {
   type    = list(string)
-  default = []
+  default = [dev]
 }
 
 # Define variables
 variable "db_name" {
   type    = string
-  default = "healthcheck_db"
+  default = "Health_Check"
 }
 
 variable "db_user" {
   type    = string
-  default = "health_check_user"
+  default = "kavya"
 }
 
 variable "db_password" {
   type    = string
-  default = "health_check_password"
+  default = "root"
 }
 
 
@@ -37,7 +37,7 @@ variable "aws_region" {
 
 variable "source_ami" {
   type    = string
-  default = "ami-0866a3c8686eaeeba" # Default Ubuntu AMI, can be replaced with your preferred one
+  default = "ami-04b4f1a9cf54c11d0" # Default Ubuntu AMI, can be replaced with your preferred one
 }
 
 variable "ssh_username" {
@@ -47,15 +47,17 @@ variable "ssh_username" {
 
 variable "subnet_id" {
   type    = string
-  default = "subnet-04ab2775b241ad6fd" # Example subnet, replace with your subnet
+  default = "subnet-08d27cf78fa1b9164" # Example subnet, replace with your subnet
 }
 
 variable "aws_access_key" {
   type = string
+  default=""
 }
 
 variable "aws_secret_key" {
   type = string
+  default=""
 }
 
 locals {
