@@ -195,8 +195,10 @@ build {
 
       "echo 'Creating Database...'",
       "sudo mysql -e \"CREATE DATABASE IF NOT EXISTS Health_Check;\"",
-      "sudo mysql -e \"CREATE USER IF NOT EXISTS 'kavya'@'localhost' IDENTIFIED BY 'root';\"",
+      # "sudo mysql -e \"CREATE USER IF NOT EXISTS 'kavya'@'localhost' IDENTIFIED BY 'root';\"",
+      "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$DB_PASSWORD'",
       "sudo mysql -e \"GRANT ALL PRIVILEGES ON *.* TO 'kavya'@'localhost' WITH GRANT OPTION;\"",
+
       "sudo mysql -e \"FLUSH PRIVILEGES;\"",
 
       # Update MySQL bind-address to allow remote connections
@@ -214,6 +216,10 @@ build {
       "sudo mkdir -p /opt/csye6225",
       "sudo chown csye6225:csye6225 /opt/csye6225",
       "sudo chmod 755 /opt/csye6225",
+
+      "sudo useradd -g csye6225 -s /usr/sbin/nologin csye6225",
+      "echo \"csye6225 ALL=(ALL:ALL) NOPASSWD: /bin/systemctl\" | sudo EDITOR=\"tee -a\" visudo",
+
 
       "echo 'Moving webapp.zip...'",
       "if [ -f /tmp/webapp.zip ]; then sudo mv /tmp/webapp.zip /opt/csye6225/ && echo 'webapp.zip moved to /opt/csye6225/'; else echo 'Error: /tmp/webapp.zip not found' && ls -l /tmp/ && exit 1; fi",
