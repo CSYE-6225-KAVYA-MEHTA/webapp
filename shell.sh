@@ -1,6 +1,6 @@
 #!/bin/bash
 
-souce /tmp/.env
+source /tmp/.env
 
 # Update and install dependencies
 sudo apt-get update -y
