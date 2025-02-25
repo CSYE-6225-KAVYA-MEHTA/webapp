@@ -147,7 +147,11 @@ build {
 
   provisioner "shell" {
     inline = [
-      
+      "cat <<EOF | sudo tee /tmp/.env",
+      "DB_NAME=${var.db_database}",
+      "DB_USER=${var.db_username}",
+      "DB_PASSWORD=${var.db_password}",
+      "EOF"
     ]
   }
 
@@ -207,8 +211,8 @@ build {
       "if [ -f /tmp/webapp.zip ]; then sudo mv /tmp/webapp.zip /opt/csye6225/ && echo 'webapp.zip moved to /opt/csye6225/'; else echo 'Error: /tmp/webapp.zip not found' && ls -l /tmp/ && exit 1; fi",
 
 
-      # "echo 'Moving application service file...'",
-      # "sudo mv /tmp/.env /opt/csye6225/",
+      "echo 'Moving application service file...'",
+      "sudo mv /tmp/.env /opt/csye6225/",
 
       "sudo chown -R csye6225:csye6225 /opt/csye6225",
       "sudo chmod 755 /opt/csye6225/webapp.zip",
@@ -217,13 +221,7 @@ build {
       "cd /opt/csye6225",
       "sudo unzip webapp.zip",
       "ls -al",
-      
-      "cat <<EOF | sudo tee /opt/csye6225/.env",
-      "DB_NAME=${var.db_database}",
-      "DB_USER=${var.db_username}",
-      "DB_PASSWORD=${var.db_password}",
-      "EOF"
-      
+
       "echo 'Setting ownership of files after unzipping'",
       "sudo chown -R csye6225:csye6225 /opt/csye6225",
       "sudo chmod -R 755 /opt/csye6225",
