@@ -147,11 +147,7 @@ build {
 
   provisioner "shell" {
     inline = [
-      "cat <<EOF | sudo tee /opt/csye6225/.env",
-      "DB_NAME=${var.db_database}",
-      "DB_USER=${var.db_username}",
-      "DB_PASSWORD=${var.db_password}",
-      "EOF"
+      
     ]
   }
 
@@ -221,7 +217,13 @@ build {
       "cd /opt/csye6225",
       "sudo unzip webapp.zip",
       "ls -al",
-
+      
+      "cat <<EOF | sudo tee /opt/csye6225/.env",
+      "DB_NAME=${var.db_database}",
+      "DB_USER=${var.db_username}",
+      "DB_PASSWORD=${var.db_password}",
+      "EOF"
+      
       "echo 'Setting ownership of files after unzipping'",
       "sudo chown -R csye6225:csye6225 /opt/csye6225",
       "sudo chmod -R 755 /opt/csye6225",
