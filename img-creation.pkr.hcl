@@ -9,7 +9,7 @@ packer {
 
 variable "ami_users" {
   type    = list(string)
-  default = [dev]
+  default = []
 }
 
 # Define variables
