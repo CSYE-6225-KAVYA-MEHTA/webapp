@@ -145,12 +145,6 @@ build {
 
 
   provisioner "shell" {
-    inline = [
-      
-    ]
-  }
-
-  provisioner "shell" {
     script = "shell.sh"
   }
 
