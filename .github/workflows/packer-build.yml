@@ -1,116 +1,75 @@
-name: Packer Build
+name: Packer Build CI
 
 on:
   push:
-    branches: ["main"] #
+    branches: ["main"]
 
 jobs:
   build:
     name: packer-build
     runs-on: ubuntu-latest
 
-    env:
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      SUBNET_ID: ${{ secrets.SUBNET_ID }}
-      SOURCE_AMI: ${{ secrets.SOURCE_AMI }}
-      DEV_USER: ${{ secrets.DEV_USER }}
-      DEMO_USER: ${{ secrets.DEMO_USER }}
-      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY}}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
-      DB_USERNAME: ${{ secrets.DB_USERNAME }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_DATABASE: ${{ secrets.DB_DATABASE }}
-      VPC_ID: ${{ secrets.VPC_ID }}
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
-          MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
-
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Packer
-        uses: hashicorp/setup-packer@v2
-        with:
-          version: "1.9.4"
-
-      - name: Setting up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18.x"
-
-      - name: Debug Directory Structure Before
+      - name: Create Zip File
         run: |
-          echo "Current directory structure:"
-          ls -R
+          zip -r webapp.zip .
+          cp webapp.zip packer/
+          ls -la packer/
 
-      # - name: Create Zip File
-      #   run: |
-      #     # Create zip excluding the packer directory and other unnecessary files
-      #     zip -r webapp.zip . -x "packer/*" "*.git*" "*node_modules*" "*logs*" "*temp*"
+      - name: List Files
+        run: ls -al
 
-      - name: Install Zip Utility
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y zip
-
-      - name: Building webapp application artifact
-        run: |
-          zip -r webapp.zip . -x "*.git*" "*node_modules*" "*logs*" "*temp*"
-
-      - name: Debug - Check if WebApp Zip File Exists
-        run: |
-          if [ ! -f webapp.zip ]; then
-            echo "ERROR: webapp.zip file is missing!"
-            exit 1
-          fi
-          ls -al webapp.zip
-
-      - name: Upload zip
+      - name: Upload Zip File
         uses: actions/upload-artifact@v4
         with:
-          name: artifact
+          name: webapp zip creation
           path: webapp.zip
-      # - name: Move Files to Packer Directory
-      #   run: |
-      #     # Move the zip file to packer directory
-      #     mv webapp.zip
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Debug Directory Structure After
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Run Packer
         run: |
-          echo "Final directory structure:"
-          ls -R
+          # Install Packer non-interactively
+          wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt-get update && sudo apt-get install packer -y
 
-      - name: Initialize Packer
+          # Navigate to packer directory and run build
+          ls
+          cd packer
+          packer init webapp.pkr.hcl
 
-        run: |
-          packer init .
-          packer fmt -recursive .
-
-      - name: Configure AWS Credentials
-        run: |
-
-          echo "Checking if img-creation.pkr.hcl exists in packer directory..."
-          ls -l img-creation.pkr.hcl || { echo "Error: img-creation.pkr.hcl not found"; exit 1; }
-
-          packer build -var-file=variables.pkrvars.hcl img-creation.pkr.hcl
+          packer build \
+            -var "aws_region=${{ secrets.AWS_REGION }}" \
+            -var "subnet_id=${{ secrets.SUBNET_ID }}" \
+            -var "source_ami=${{ secrets.SOURCE_AMI }}" \
+            -var "dev_user=${{ secrets.DEV_USER }}" \
+            -var "demo_user=${{ secrets.DEMO_USER }}" \
+            -var "security_group_id=${{ secrets.SECURITY_GROUP_ID }}" \
+            -var "db_username=${{ secrets.DB_EC2_USER }}" \
+            -var "db_password=${{ secrets.DB_PASSWORD }}" \
+            -var "db_database=${{ secrets.DB_DATABASE }}" \
+            -var "server_port=${{ secrets.PORT }}" \
+            -var "db_host=${{ secrets.DB_HOST }}" \
+            -var "gcp_zone=${{secrets.GCP_ZONE}}" \
+            -var "ami_name_gcp=${{secrets.AMI_NAME_GCP}}" \
+            img-creation.pkr.hcl

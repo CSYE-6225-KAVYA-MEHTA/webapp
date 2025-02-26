@@ -1,23 +1,23 @@
+
 [Unit]
 Description=Node.js Application
-ConditionPathExists=/opt/webapp/.env
+ConditionPathExists=/opt/csye6225/.env
 After=network.target
-
-
+ 
+ 
 [Service]
-EnvironmentFile=/opt/webapp/.env
+EnvironmentFile=/opt/csye6225/.env
 Type=simple
 User=csye6225
 Group=csye6225
-WorkingDirectory=/opt/webapp/
-EnvironmentFile=/opt/webapp/.env
-ExecStartPre=/usr/bin/npm install
-ExecStart=/usr/bin/node /opt/webapp/app.js
+WorkingDirectory=/opt/csye6225
+EnvironmentFile=/opt/csye6225/.env
+ExecStart=/usr/bin/npm start
 Restart=always
 RestartSec=3
 StandardOutput=append:/var/log/webapp_output.log
 StandardError=append:/var/log/webapp_error.log
-
-
+ 
+ 
 [Install]
 WantedBy=multi-user.target
