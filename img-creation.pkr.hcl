@@ -145,18 +145,6 @@ build {
 
 
   provisioner "shell" {
-    inline = [
-      "cat <<EOF | sudo tee /tmp/.env",
-      "DB_NAME=${var.db_database}",
-      "DB_USER=${var.db_username}",
-      "DB_PASSWORD=${var.db_password}",
-      "DB_HOST=${var.db_host}",
-      "PORT=${var.port}",
-      "EOF"
-    ]
-  }
-
-  provisioner "shell" {
     script = "shell.sh"
   }
 
