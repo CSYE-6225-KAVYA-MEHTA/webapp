@@ -66,7 +66,7 @@ jobs:
             -var "db_username=${{ secrets.DB_EC2_USER }}" \
             -var "db_password=${{ secrets.DB_PASSWORD }}" \
             -var "db_database=${{ secrets.DB_DATABASE }}" \
-            -var "server_port=${{ secrets.PORT }}" \
+            -var "server_port=${{ secrets.SERVER_PORT }}" \
             -var "db_host=${{ secrets.DB_HOST }}" \
             -var "gcp_zone=${{secrets.GCP_ZONE}}" \
             -var "ami_name_gcp=${{secrets.AMI_NAME_GCP}}" \
