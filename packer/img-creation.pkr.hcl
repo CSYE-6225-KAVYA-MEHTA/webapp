@@ -117,7 +117,7 @@ locals {
   ami_description = "Image for webapp"
   timestamp       = regex_replace(timestamp(), "[- TZ:]", "")
 }
-
+#
 
 source "amazon-ebs" "my-ami" {
   region            = var.aws_region
