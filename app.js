@@ -3,7 +3,7 @@ const express = require("express");
 const { healthCheck } = require("./controllers/healthCheckController");
 
 const app = express();
-const PORT = process.env.PORT;
+const SERVER_PORT = process.env.SERVER_PORT;
 
 // Middleware to catch JSON parsing errors
 app.use((req, res, next) => {
@@ -23,8 +23,8 @@ app.all("/healthz", (req, res) => {
 });
 // Start the server
 if (require.main === module) {
-  const server = app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+  const server = app.listen(SERVER_PORT, () => {
+    console.log(`Server is running on http://localhost:${SERVER_PORT}`);
   });
 }
 
