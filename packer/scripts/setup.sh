@@ -73,7 +73,7 @@ sudo npm install dotenv
 
 echo "CREATE .ENV"
 cat << EOF > .env
-SERVER_PORT=${SERVER_PORT}
+PORT=${SERVER_PORT}
 DB_HOST=${DB_HOST}
 DB_USERNAME=${DB_USERNAME}
 DB_PASSWORD=${DB_PASSWORD}
