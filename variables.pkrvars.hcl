@@ -9,6 +9,6 @@ dev_user          = "248189920505"
 demo_user         = "699475940666"
 
 
-db_database       = "Health_Check"
-db_user_name       = "root"
-db_password       = "root"
+DB_NAME       = "Health_Check"
+DB_USER           = "kavya"
+DB_PASSWORD       = "root"
