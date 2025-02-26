@@ -1,6 +1,5 @@
 #!/bin/bash
 
-source /tmp/.env
 
 # Update and install dependencies
 sudo apt-get update -y
@@ -41,15 +40,15 @@ sudo unzip /opt/webapp.zip -d /opt/webapp
 
 cd /opt/webapp || exit
 
-cat <<EOF | sudo tee /tmp/.env,
-DB_NAME=$DB_NAME
-DB_USER=$DB_USER
-DB_PASSWORD=$DB_PASSWORD
+sudo bash -c 'cat <<EOF > /opt/webapp
+DB_NAME='"$DB_NAME"'
+DB_USER='"$DB_USER"'
+DB_PASSWORD='"$DB_PASSWORD"'
 DB_HOST=localhost
 PORT=8080
-EOF
+EOF'
 
-sudo cp /tmp/.env /opt/webapp
+
 
 
 
