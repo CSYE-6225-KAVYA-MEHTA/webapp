@@ -1,4 +1,4 @@
-name: Packer CI
+name: Packer VALIDATE
 
 on:
   pull_request:
@@ -13,14 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up HashiCorp Packer using the correct version
       - name: Setup Packer
         uses: hashicorp/setup-packer@main
         id: setup
         with:
           version: "1.11.2"
 
-      # Run packer init to install the necessary plugins
       - name: Run packer init
         run: |
           packer init ./packer/img-creation.pkr.hcl
@@ -31,13 +29,9 @@ jobs:
           cd packer
           packer fmt -check .
 
-        # Fail if packer fmt makes changes
-        continue-on-error: false
-        if: failure() # This ensures that the job fails if packer fmt makes modifications
-
       - name: Run packer validate
         id: validate
-        #   working-directory: packer
+
         run: |
           cd packer
           packer validate img-creation.pkr.hcl

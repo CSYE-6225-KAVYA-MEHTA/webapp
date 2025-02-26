@@ -4,6 +4,7 @@ Description=Node.js Application
 ConditionPathExists=/opt/csye6225/.env
 After=network.target
  
+
  
 [Service]
 EnvironmentFile=/opt/csye6225/.env
@@ -18,6 +19,7 @@ RestartSec=3
 StandardOutput=append:/var/log/webapp_output.log
 StandardError=append:/var/log/webapp_error.log
  
- 
+
+
 [Install]
 WantedBy=multi-user.target
