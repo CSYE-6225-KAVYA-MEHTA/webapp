@@ -33,7 +33,7 @@ variable "demo_user" {
   type        = string
   default     = "699475940666"
 }
-
+#ID FOR DEV USER
 variable "dev_user" {
   description = "dev user ID"
   type        = string
