@@ -38,9 +38,20 @@ sudo systemctl restart mysql
 sudo cp /tmp/application.service /etc/systemd/system/
 sudo cp /tmp/webapp.zip /opt/
 sudo unzip /opt/webapp.zip -d /opt/webapp
-sudo cp /tmp/.env /opt/webapp
 
 cd /opt/webapp || exit
+
+cat <<EOF | sudo tee /tmp/.env,
+DB_NAME=$DB_NAME
+DB_USER=$DB_USERNAME
+DB_PASSWORD=$DB_PASSWORD
+DB_HOST=localhost
+PORT=8080
+EOF
+
+sudo cp /tmp/.env /opt/webapp
+
+
 
 # Create user and set permissions
 sudo useradd -g csye6225 -s /usr/sbin/nologin csye6225 || echo "User already exists"
