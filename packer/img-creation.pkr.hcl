@@ -33,6 +33,7 @@ variable "demo_user" {
   type        = string
   default     = "699475940666"
 }
+
 #ID FOR DEV USER
 variable "dev_user" {
   description = "dev user ID"
@@ -100,7 +101,7 @@ variable "db_host" {
 variable "gcp_zone" {
   type    = string
   default = "us-central1-a"
-}
+           }
 
 variable "ami_name_gcp" {
   default = "webami"
@@ -143,6 +144,9 @@ source "amazon-ebs" "my-ami" {
     volume_type           = "gp2"
   }
 }
+
+
+
 source "googlecompute" "gcp_image" {
   project_id          = var.gcp_project_id
   source_image_family = "ubuntu-2004-lts"
