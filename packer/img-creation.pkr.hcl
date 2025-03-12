@@ -33,6 +33,7 @@ variable "demo_user" {
   type        = string
   default     = "699475940666"
 }
+
 #ID FOR DEV USER
 variable "dev_user" {
   description = "dev user ID"
@@ -54,10 +55,10 @@ variable "ssh_username" {
 
 
 # Instance Type
-variable "instance_type" {
-  type    = string
-  default = "t2.micro"
-}
+# variable "instance_type" {
+#   type    = string
+#   default = "t2.micro"
+# }
 
 # Volume Size
 variable "volume_size" {
@@ -143,6 +144,9 @@ source "amazon-ebs" "my-ami" {
     volume_type           = "gp2"
   }
 }
+
+
+
 source "googlecompute" "gcp_image" {
   project_id          = var.gcp_project_id
   source_image_family = "ubuntu-2004-lts"
