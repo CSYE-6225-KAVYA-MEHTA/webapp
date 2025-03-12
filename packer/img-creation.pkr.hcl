@@ -55,10 +55,10 @@ variable "ssh_username" {
 
 
 # Instance Type
-# variable "instance_type" {
-#   type    = string
-#   default = "t2.micro"
-# }
+variable "instance_type" {
+  type    = string
+  default = "t2.micro"
+}
 
 # Volume Size
 variable "volume_size" {
