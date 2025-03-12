@@ -48,10 +48,10 @@ variable "source_ami" {
 }
 
 # SSH username for the EC2 instance
-variable "ssh_username" {
-  type    = string
-  default = "ubuntu"
-}
+# variable "ssh_username" {
+#   type    = string
+#   default = "ubuntu"
+# }
 
 
 # Instance Type
@@ -101,7 +101,7 @@ variable "db_host" {
 variable "gcp_zone" {
   type    = string
   default = "us-central1-a"
-           }
+}
 
 variable "ami_name_gcp" {
   default = "webami"
