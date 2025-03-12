@@ -48,17 +48,17 @@ variable "source_ami" {
 }
 
 # SSH username for the EC2 instance
-# variable "ssh_username" {
-#   type    = string
-#   default = "ubuntu"
-# }
+variable "ssh_username" {
+  type    = string
+  default = "ubuntu"
+}
 
 
 # Instance Type
-variable "instance_type" {
-  type    = string
-  default = "t2.micro"
-}
+# variable "instance_type" {
+#   type    = string
+#   default = "t2.micro"
+# }
 
 # Volume Size
 variable "volume_size" {
