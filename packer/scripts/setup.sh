@@ -16,26 +16,26 @@ sudo apt-get upgrade -y
 
 echo "INSTALL PACKAGES"
 
-sudo apt-get install -y mysql-server-8.0 || sudo apt-get install -y mysql-server
+# sudo apt-get install -y mysql-server-8.0 || sudo apt-get install -y mysql-server
 sudo apt-get install -y unzip
 
 
 
-echo "START SQL"
-sudo systemctl start mysql
-sudo systemctl enable mysql
+# echo "START SQL"
+# sudo systemctl start mysql
+# sudo systemctl enable mysql
 
-echo "CREATE DB"
-echo $DB_DATABASE
-echo $DB_USERNAME
-echo $DB_PASSWORD
-sudo mysql -u root -e "CREATE database IF NOT EXISTS ${DB_DATABASE};"
+# echo "CREATE DB"
+# echo $DB_DATABASE
+# echo $DB_USERNAME
+# echo $DB_PASSWORD
+# sudo mysql -u root -e "CREATE database IF NOT EXISTS ${DB_DATABASE};"
 
-echo "GRANT PERMISSION"
-sudo mysql -e "CREATE USER IF NOT EXISTS '${DB_USERNAME}'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';"
+# echo "GRANT PERMISSION"
+# sudo mysql -e "CREATE USER IF NOT EXISTS '${DB_USERNAME}'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';"
 
-sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO '${DB_USERNAME}'@'localhost' WITH GRANT OPTION;"
-sudo mysql -e "FLUSH PRIVILEGES;"
+# sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO '${DB_USERNAME}'@'localhost' WITH GRANT OPTION;"
+# sudo mysql -e "FLUSH PRIVILEGES;"
 
 
 
@@ -71,14 +71,14 @@ cd /opt/csye6225 || exit 1
 sudo npm install 
 sudo npm install dotenv
 
-echo "CREATE .ENV"
-cat << EOF > .env
-SERVER_PORT=${SERVER_PORT}
-DB_HOST=${DB_HOST}
-DB_USERNAME=${DB_USERNAME}
-DB_PASSWORD=${DB_PASSWORD}
-DB_DATABASE=${DB_DATABASE}
-EOF
+# echo "CREATE .ENV"
+# cat << EOF > .env
+# SERVER_PORT=${SERVER_PORT}
+# DB_HOST=${DB_HOST}
+# DB_USERNAME=${DB_USERNAME}
+# DB_PASSWORD=${DB_PASSWORD}
+# DB_DATABASE=${DB_DATABASE}
+# EOF
 
 sudo mv /opt/csye6225/packer/webapp.service /etc/systemd/system/webapp.service
 
