@@ -68,6 +68,6 @@ jobs:
             -var "db_database=${{ secrets.DB_DATABASE }}" \
             -var "server_port=${{ secrets.SERVER_PORT }}" \
             -var "db_host=${{ secrets.DB_HOST }}" \
-            # -var "gcp_zone=${{secrets.GCP_ZONE}}" \
-            # -var "ami_name_gcp=${{secrets.AMI_NAME_GCP}}" \
+            -var "gcp_zone=${{secrets.GCP_ZONE}}" \
+            -var "ami_name_gcp=${{secrets.AMI_NAME_GCP}}" \
             img-creation.pkr.hcl
