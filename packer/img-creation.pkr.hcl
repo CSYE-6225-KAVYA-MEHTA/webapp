@@ -4,11 +4,11 @@ packer {
       version = ">= 1.0.0, < 2.0.0"
       source  = "github.com/hashicorp/amazon"
     }
-    googlecompute = {
+    # googlecompute = {
 
-      version = ">= 1.0.0, <2.0.0"
-      source  = "github.com/hashicorp/googlecompute"
-    }
+    #   version = ">= 1.0.0, <2.0.0"
+    #   source  = "github.com/hashicorp/googlecompute"
+    # }
   }
 }
 
@@ -98,19 +98,19 @@ variable "db_host" {
 }
 
 
-variable "gcp_zone" {
-  type    = string
-  default = "us-central1-a"
-}
+# variable "gcp_zone" {
+#   type    = string
+#   default = "us-central1-a"
+# }
 
-variable "ami_name_gcp" {
-  default = "webami"
-}
+# variable "ami_name_gcp" {
+#   default = "webami"
+# }
 
-variable "gcp_project_id" {
-  type    = string
-  default = "webapp-452003"
-}
+# variable "gcp_project_id" {
+#   type    = string
+#   default = "webapp-452003"
+# }
 
 
 
@@ -147,18 +147,18 @@ source "amazon-ebs" "my-ami" {
 
 
 
-source "googlecompute" "gcp_image" {
-  project_id          = var.gcp_project_id
-  source_image_family = "ubuntu-2004-lts"
-  image_name          = "webami-gcp-${local.timestamp}"
-  machine_type        = "e2-medium"
-  zone                = var.gcp_zone
-  ssh_username        = "ubuntu"
-}
-
+# source "googlecompute" "gcp_image" {
+#   project_id          = var.gcp_project_id
+#   source_image_family = "ubuntu-2004-lts"
+#   image_name          = "webami-gcp-${local.timestamp}"
+#   machine_type        = "e2-medium"
+#   zone                = var.gcp_zone
+#   ssh_username        = "ubuntu"
+# }
+#  "source.googlecompute.gcp_image"
 build {
   sources = [
-    "source.amazon-ebs.my-ami", "source.googlecompute.gcp_image"
+    "source.amazon-ebs.my-ami"
   ]
 
   provisioner "file" {
