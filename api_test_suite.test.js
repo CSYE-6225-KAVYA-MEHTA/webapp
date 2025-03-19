@@ -29,7 +29,7 @@ describe("API Tests", () => {
   test("GET /healthz should return 400 for requests with Content-Length header", async () => {
     const response = await request(app)
       .get("/healthz")
-      .set("Content-Length", "10"); // Simulating a non-zero content length
+      .set("Content-Length", "10");
     expect(response.statusCode).toBe(400);
   });
 
