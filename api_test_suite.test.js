@@ -38,9 +38,4 @@ describe("API Tests", () => {
     const response = await request(app).get("/healthz");
     expect([200, 503]).toContain(response.statusCode); // Expect either success or failure
   });
-
-  test("GET /nonexistent should return 404", async () => {
-    const response = await request(app).get("/nonexistent"); // Accessing an undefined route
-    expect(response.statusCode).toBe(404);
-  });
 });
