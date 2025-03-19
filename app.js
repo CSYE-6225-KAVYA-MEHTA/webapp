@@ -151,7 +151,7 @@ app.all("*", (req, res) => {
 // Start the server
 if (require.main === module) {
   const server = app.listen(SERVER_PORT, () => {
-    console.log(`Server is running on http://${DB_HOST}:${SERVER_PORT}`);
+    console.log(`Server is running`);
   });
 }
 
