@@ -33,6 +33,33 @@ const Check = sequelize.define(
   }
 );
 
+const File = sequelize.define(
+  "File",
+  {
+    fileId: {
+      type: Sequelize.UUID, // Use UUID type
+      defaultValue: Sequelize.UUIDV4, // Automatically generate UUID
+      primaryKey: true,
+      allowNull: false,
+    },
+    filename: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+    s3Path: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+    metadata: {
+      type: Sequelize.JSON,
+      allowNull: true,
+    },
+  },
+  {
+    timestamps: true, // adds createdAt and updatedAt
+  }
+);
+
 // Test connection to the database
 (async () => {
   try {
@@ -42,6 +69,9 @@ const Check = sequelize.define(
     // Synchronize the Check model with the database
     await Check.sync({ alter: true }); // Adjust database to match model
     console.log("Check model synchronized with the database.");
+
+    await File.sync({ alter: true });
+    console.log("File model synchronized with the database.");
   } catch (error) {
     console.error(
       "Unable to connect to the database or synchronize the model:",
@@ -49,4 +79,5 @@ const Check = sequelize.define(
     );
   }
 })();
-module.exports = { Check };
+
+module.exports = { Check, File };
