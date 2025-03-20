@@ -53,7 +53,6 @@ variable "ssh_username" {
   default = "ubuntu"
 }
 
-
 # Instance Type
 variable "instance_type" {
   type    = string
