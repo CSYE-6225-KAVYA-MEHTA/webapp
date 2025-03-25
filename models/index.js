@@ -50,6 +50,10 @@ const File = sequelize.define(
       type: Sequelize.STRING,
       allowNull: false,
     },
+    upload_date: {
+      type: Sequelize.DATE,
+      allowNull: false,
+    },
   },
   {
     timestamps: true, // adds createdAt and updatedAt
