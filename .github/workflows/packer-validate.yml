@@ -30,7 +30,7 @@ jobs:
             echo "CloudWatch agent provisioner is present."
           else
             echo "ERROR: CloudWatch agent provisioner not found!"
-          exit 1
+            exit 1
           fi
 
       - name: Run packer fmt
