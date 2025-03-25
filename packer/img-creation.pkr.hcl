@@ -177,11 +177,11 @@ build {
   # }
 
 
-  provisioner "shell" {
-  inline = [
-    "sudo apt-get update -y",
-    "sudo apt-get install -y amazon-cloudwatch-agent"
-  ]
-}
+#   provisioner "shell" {
+#   inline = [
+#     "sudo apt-get update -y",
+#     "sudo apt-get install -y amazon-cloudwatch-agent"
+#   ]
+# }
 
 }

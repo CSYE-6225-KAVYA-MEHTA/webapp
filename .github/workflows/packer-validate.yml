@@ -23,15 +23,15 @@ jobs:
         run: |
           packer init ./packer/img-creation.pkr.hcl
 
-      - name: Check CloudWatch Agent Provisioner
-        run: |
-          cd packer
-          if packer inspect img-creation.pkr.hcl | grep -q "amazon-cloudwatch-agent"; then
-            echo "CloudWatch agent provisioner is present."
-          else
-            echo "ERROR: CloudWatch agent provisioner not found!"
-            exit 1
-          fi
+      # - name: Check CloudWatch Agent Provisioner
+      #   run: |
+      #     cd packer
+      #     if packer inspect img-creation.pkr.hcl | grep -q "amazon-cloudwatch-agent"; then
+      #       echo "CloudWatch agent provisioner is present."
+      #     else
+      #       echo "ERROR: CloudWatch agent provisioner not found!"
+      #       exit 1
+      #     fi
 
       - name: Run packer fmt
         id: fmt
