@@ -2,6 +2,7 @@ require("dotenv").config(); // Load environment variables
 const express = require("express");
 const AWS = require("aws-sdk");
 const multer = require("multer");
+const { v4: uuidv4 } = require("uuid");
 const upload = multer({ storage: multer.memoryStorage() }); // Use memory storage for file uploads
 const { healthCheck } = require("./controllers/healthCheckController");
 
@@ -59,8 +60,8 @@ function validateFileBody(req, res, next) {
 }
 
 function multerSingleFile(req, res, next) {
-  // This tells Multer to look for a field named "file"
-  upload.single("file")(req, res, (err) => {
+  // This tells Multer to look for a field named "profilepic"
+  upload.single("profilepic")(req, res, (err) => {
     if (err) {
       // Check if the error is a MulterError (like "Unexpected field")
       if (err instanceof multer.MulterError) {
@@ -83,11 +84,12 @@ app.post("/v1/file", multerSingleFile, validateFileBody, async (req, res) => {
     }
 
     // Initialize the S3 client
+    const id = uuidv4();
     const s3 = new AWS.S3();
     const bucketName = process.env.S3_BUCKET; // S3 bucket name from .env
     const params = {
       Bucket: bucketName,
-      Key: req.file.originalname, // In production, consider adding a unique prefix/timestamp
+      Key: `${id}-${req.file.originalname}`, // In production, consider adding a unique prefix/timestamp
       Body: req.file.buffer,
     };
 
@@ -95,14 +97,17 @@ app.post("/v1/file", multerSingleFile, validateFileBody, async (req, res) => {
 
     // Save file metadata in the database
     const fileRecord = await File.create({
+      fileId: id,
       filename: req.file.originalname,
       s3Path: s3Result.Location,
+      upload_date: new Date().toISOString().split("T")[0],
     });
 
     return res.status(201).json({
       fileId: fileRecord.fileId,
       filename: fileRecord.filename,
       s3Path: fileRecord.s3Path,
+      upload_date: fileRecord.upload_date.toISOString().split("T")[0],
     });
   } catch (error) {
     console.error("Failed:", error);
