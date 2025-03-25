@@ -65,7 +65,7 @@ echo "INSTALL"
 sudo apt-get install -y nodejs
 sudo apt-get install -y npm
 
-sudo chown -R ubuntu:ubuntu /opt/csye6225
+sudo chown -R csye6225:csye6225 /opt/csye6225
 cd /opt/csye6225 || exit 1
 
 sudo npm install 
