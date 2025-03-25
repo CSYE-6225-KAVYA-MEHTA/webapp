@@ -165,23 +165,17 @@ build {
     destination = "/tmp/webapp.zip"
   }
 
-  # provisioner "shell" {
-  #   script = "scripts/setup.sh"
-  #   environment_vars = [
-  #     "DB_USERNAME=${var.db_username}",
-  #     "DB_PASSWORD=${var.db_password}",
-  #     "DB_DATABASE=${var.db_database}",
-  #     "SERVER_PORT=${var.server_port}",
-  #     "DB_HOST=${var.db_host}"
-  #   ]
-  # }
+  provisioner "shell" {
+    script = "scripts/setup.sh"
+    environment_vars = [
+      "DB_USERNAME=${var.db_username}",
+      "DB_PASSWORD=${var.db_password}",
+      "DB_DATABASE=${var.db_database}",
+      "SERVER_PORT=${var.server_port}",
+      "DB_HOST=${var.db_host}"
+    ]
+  }
 
 
-#   provisioner "shell" {
-#   inline = [
-#     "sudo apt-get update -y",
-#     "sudo apt-get install -y amazon-cloudwatch-agent"
-#   ]
-# }
-
+  
 }
