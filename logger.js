@@ -2,16 +2,16 @@ const winston = require("winston");
 const AWS = require("aws-sdk");
 const fs = require("fs");
 
-// Set AWS region for CloudWatch Logs
+// Configure AWS SDK for CloudWatch Logs (adjust region as needed)
 AWS.config.update({ region: "us-east-1" });
 const cloudwatchLogs = new AWS.CloudWatchLogs();
 
-const logGroupName = "csye6225"; // This is the log group name in CloudWatch
+const logGroupName = "csye6225";
+const logStreamName = `webapp-log-stream-${Date.now()}`;
 
-// Function to create log group and stream if they don't exist
+// Function to create CloudWatch Log Group and Log Stream if needed
 async function setupCloudWatchLogging() {
   try {
-    // Check if the log group exists
     const groups = await cloudwatchLogs
       .describeLogGroups({ logGroupNamePrefix: logGroupName })
       .promise();
@@ -21,8 +21,6 @@ async function setupCloudWatchLogging() {
       await cloudwatchLogs.createLogGroup({ logGroupName }).promise();
       console.log(`Created log group: ${logGroupName}`);
     }
-    // Create a log stream (here we use a timestamp-based stream name)
-    const logStreamName = `app-log-stream-${Date.now()}`;
     await cloudwatchLogs
       .createLogStream({ logGroupName, logStreamName })
       .promise();
@@ -30,17 +28,30 @@ async function setupCloudWatchLogging() {
       `Created log stream: ${logStreamName} in log group: ${logGroupName}`
     );
   } catch (error) {
-    console.error("Error setting up CloudWatch logging:", error);
+    // If error is due to not being on an EC2 environment (metadata request returns 400), log a message and skip
+    if (
+      error.code === "CredentialsError" &&
+      error.originalError &&
+      error.originalError.message.includes(
+        "EC2 Metadata token request returned 400"
+      )
+    ) {
+      console.error(
+        "Not running in an EC2 environment. Skipping CloudWatch log group and stream creation."
+      );
+    } else {
+      console.error("Error setting up CloudWatch logging:", error);
+    }
   }
 }
 
-// Call the setup function on startup (asynchronously)
+// Attempt to set up CloudWatch logging
 setupCloudWatchLogging();
 
-// Define the path for the local log file (ensure it’s under /opt/csye6225)
+// Define the local log file path (ensuring it is under /opt/csye6225)
 const logFilePath = "/opt/csye6225/app.log";
 
-// Ensure the log file exists and has proper permissions
+// Ensure the log file exists with proper permissions
 if (!fs.existsSync(logFilePath)) {
   fs.writeFileSync(logFilePath, "", { mode: 0o666 });
 }
@@ -53,9 +64,7 @@ const logger = winston.createLogger({
     winston.format.json()
   ),
   transports: [
-    // Log to a file at /opt/csye6225/app.log
     new winston.transports.File({ filename: logFilePath }),
-    // Also log to console (for development/debug)
     new winston.transports.Console({ format: winston.format.simple() }),
   ],
 });
