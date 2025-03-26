@@ -26,12 +26,6 @@ app.use((req, res, next) => {
   });
 });
 
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID, // AWS Access Key from .env
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, // AWS Secret Key from .env
-  region: process.env.AWS_REGION, // AWS Region from .env
-});
-
 // Routes
 app.get("/healthz", healthCheck);
 app.all("/healthz", (req, res) => {
