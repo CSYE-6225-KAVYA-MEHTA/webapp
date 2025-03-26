@@ -22,4 +22,17 @@ function logS3Call(apiAction, duration) {
   statsd.timing(`s3.${apiAction}.execution_time`, duration);
 }
 
-module.exports = { logApiCall, logApiResponseTime, logDbQueryTime, logS3Call };
+// Shutdown function to close the UDP socket
+function shutdownStatsD() {
+  if (statsd && statsd.socket) {
+    statsd.socket.close();
+  }
+}
+
+module.exports = {
+  logApiCall,
+  logApiResponseTime,
+  logDbQueryTime,
+  logS3Call,
+  shutdownStatsD,
+};

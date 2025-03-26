@@ -9,6 +9,13 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,
     dialect: "mysql",
+    dialectOptions: {
+      charset: "utf8mb4", // Force charset to utf8mb4 to avoid CESU8 error
+    },
+    logging: (query, executionTime) => {
+      // Log the SQL statement and its execution time
+      console.log(`${query} - ${executionTime}ms`);
+    },
   }
 );
 

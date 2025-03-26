@@ -16,6 +16,7 @@
     "jest": "^29.7.0",
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.14.0",
+    "node-statsd": "^0.1.1",
     "nodemon": "^3.1.9",
     "sequelize": "^6.37.5",
     "supertest": "^7.0.0",
