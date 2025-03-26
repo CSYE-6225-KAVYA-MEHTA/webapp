@@ -29,32 +29,27 @@ variable "demo_user" {
   default     = "699475940666"
 }
 
-# ID FOR DEV USER
 variable "dev_user" {
   description = "dev user ID"
   type        = string
   default     = "248189920505"
 }
 
-# Ubuntu 24.04 LTS AMI ID
 variable "source_ami" {
   type    = string
-  default = "ami-04b4f1a9cf54c11d0"
+  default = "ami-04b4f1a9cf54c11d0" # Example: Ubuntu 24.04 LTS
 }
 
-# SSH username for the EC2 instance
 variable "ssh_username" {
   type    = string
   default = "ubuntu"
 }
 
-# Instance Type
 variable "instance_type" {
   type    = string
   default = "t2.micro"
 }
 
-# Volume Size
 variable "volume_size" {
   type    = number
   default = 25
@@ -95,7 +90,7 @@ locals {
   timestamp       = regex_replace(timestamp(), "[- TZ:]", "")
 }
 
-# AWS EB Source
+# AWS Amazon EBS Builder
 source "amazon-ebs" "my-ami" {
   region            = var.aws_region
   ami_name          = "csye6225_${formatdate("YYYY_MM_DD_hh_mm_ss", timestamp())}"
@@ -107,10 +102,9 @@ source "amazon-ebs" "my-ami" {
 
   instance_type = var.instance_type
   source_ami    = var.source_ami
-  ssh_interface = "public_ip" # Ensures SSH via public IP
+  ssh_interface = "public_ip"
   ssh_username  = var.ssh_username
 
-  # EBS volume settings
   launch_block_device_mappings {
     delete_on_termination = true
     device_name           = "/dev/sda1"
@@ -124,13 +118,13 @@ build {
     "source.amazon-ebs.my-ami"
   ]
 
-  # Provisioner: Copy the webapp.zip file
+  
   provisioner "file" {
     source      = "webapp.zip"
     destination = "/tmp/webapp.zip"
   }
 
-  # Provisioner: Run setup.sh script to install dependencies and deploy the app
+  
   provisioner "shell" {
     script = "scripts/setup.sh"
     environment_vars = [
@@ -142,22 +136,13 @@ build {
     ]
   }
 
-  # Provisioner: Copy CloudWatch Agent configuration (only for AWS)
-  provisioner "file" {
-    only        = ["amazon-ebs.my-ami"]
-    source      = "amazon-cloudwatch-agent.json"
-    destination = "/tmp/amazon-cloudwatch-agent.json"
-  }
-
-  # Provisioner: Install and configure CloudWatch Agent (only for AWS)
   provisioner "shell" {
-    only = ["amazon-ebs.my-ami"]
-    inline = [
-      "sudo apt-get update -y",
-      "sudo apt-get install -y amazon-cloudwatch-agent",
-      "sudo mkdir -p /opt/aws/amazon-cloudwatch-agent/etc",
-      "sudo mv /tmp/amazon-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json",
-      "sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s"
-    ]
-  }
+  only = ["amazon-ebs.my-ami"]
+  inline = [
+    "sudo apt-get update -y",
+    "sudo apt-get install -y amazon-cloudwatch-agent",
+    "sudo mkdir -p /opt/aws/amazon-cloudwatch-agent/etc",
+    "sudo chmod 755 /opt/aws/amazon-cloudwatch-agent/etc"
+  ]
+}
 }
