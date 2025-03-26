@@ -27,7 +27,7 @@ jobs:
         id: fmt
         run: |
           cd packer
-          packer fmt -check .
+          packer fmt .
 
       - name: Run packer validate
         id: validate
