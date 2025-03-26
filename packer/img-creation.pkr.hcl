@@ -4,11 +4,6 @@ packer {
       version = ">= 1.0.0, < 2.0.0"
       source  = "github.com/hashicorp/amazon"
     }
-    googlecompute = {
-
-      version = ">= 1.0.0, <2.0.0"
-      source  = "github.com/hashicorp/googlecompute"
-    }
   }
 }
 
@@ -34,7 +29,7 @@ variable "demo_user" {
   default     = "699475940666"
 }
 
-#ID FOR DEV USER
+# ID FOR DEV USER
 variable "dev_user" {
   description = "dev user ID"
   type        = string
@@ -83,7 +78,6 @@ variable "db_database" {
   default   = "database"
 }
 
-
 variable "server_port" {
   type      = string
   sensitive = true
@@ -96,29 +90,12 @@ variable "db_host" {
   default   = "localhost"
 }
 
-
-variable "gcp_zone" {
-  type    = string
-  default = "us-central1-a"
-}
-
-variable "ami_name_gcp" {
-  default = "webami"
-}
-
-variable "gcp_project_id" {
-  type    = string
-  default = "webapp-452003"
-}
-
-
-
 locals {
   ami_description = "Image for webapp"
   timestamp       = regex_replace(timestamp(), "[- TZ:]", "")
 }
-#
 
+# AWS EB Source
 source "amazon-ebs" "my-ami" {
   region            = var.aws_region
   ami_name          = "csye6225_${formatdate("YYYY_MM_DD_hh_mm_ss", timestamp())}"
@@ -133,38 +110,27 @@ source "amazon-ebs" "my-ami" {
   ssh_interface = "public_ip" # Ensures SSH via public IP
   ssh_username  = var.ssh_username
 
-
-
   # EBS volume settings
   launch_block_device_mappings {
     delete_on_termination = true
     device_name           = "/dev/sda1"
-    volume_size           = 25
+    volume_size           = var.volume_size
     volume_type           = "gp2"
   }
 }
 
-
-
-source "googlecompute" "gcp_image" {
-  project_id          = var.gcp_project_id
-  source_image_family = "ubuntu-2004-lts"
-  image_name          = "webami-gcp-${local.timestamp}"
-  machine_type        = "e2-medium"
-  zone                = var.gcp_zone
-  ssh_username        = "ubuntu"
-}
-
 build {
   sources = [
-    "source.amazon-ebs.my-ami", "source.googlecompute.gcp_image"
+    "source.amazon-ebs.my-ami"
   ]
 
+  # Provisioner: Copy the webapp.zip file
   provisioner "file" {
     source      = "webapp.zip"
     destination = "/tmp/webapp.zip"
   }
 
+  # Provisioner: Run setup.sh script to install dependencies and deploy the app
   provisioner "shell" {
     script = "scripts/setup.sh"
     environment_vars = [
@@ -176,4 +142,22 @@ build {
     ]
   }
 
+  # Provisioner: Copy CloudWatch Agent configuration (only for AWS)
+  provisioner "file" {
+    only        = ["amazon-ebs.my-ami"]
+    source      = "amazon-cloudwatch-agent.json"
+    destination = "/tmp/amazon-cloudwatch-agent.json"
+  }
+
+  # Provisioner: Install and configure CloudWatch Agent (only for AWS)
+  provisioner "shell" {
+    only = ["amazon-ebs.my-ami"]
+    inline = [
+      "sudo apt-get update -y",
+      "sudo apt-get install -y amazon-cloudwatch-agent",
+      "sudo mkdir -p /opt/aws/amazon-cloudwatch-agent/etc",
+      "sudo mv /tmp/amazon-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json",
+      "sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s"
+    ]
+  }
 }
