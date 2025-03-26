@@ -1,36 +1,38 @@
-require("dotenv").config(); // Load environment variables
+require("dotenv").config();
 const express = require("express");
 const AWS = require("aws-sdk");
 const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
-const upload = multer({ storage: multer.memoryStorage() }); // Use memory storage for file uploads
+
+const upload = multer({ storage: multer.memoryStorage() });
 const { healthCheck } = require("./controllers/healthCheckController");
 
-// Import the File model from your models (assumed to be defined in your index.js)
+// Import the File model (from index.js)
 const { File } = require("./models/index");
 
-const logger = require("./logger");
+const logger = require("./logger"); // Logging module
+const {
+  logApiCall,
+  logApiResponseTime,
+  logDbQueryTime,
+  logS3Call,
+} = require("./metrics"); // Metrics module
 
 const app = express();
-const SERVER_PORT = process.env.SERVER_PORT;
+const SERVER_PORT = process.env.SERVER_PORT || 8080;
+
+app.use(express.json());
 
 // Middleware to catch JSON parsing errors
 app.use((req, res, next) => {
   express.json()(req, res, (err) => {
     if (err) {
-      // console.error("JSON parse error:", err.message);
       logger.error("JSON parse error: " + err.message);
       return res.status(400).send();
     }
     next();
   });
 });
-
-// AWS.config.update({
-//   accessKeyId: process.env.AWS_ACCESS_KEY_ID, // AWS Access Key from .env
-//   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, // AWS Secret Key from .env
-//   region: process.env.AWS_REGION, // AWS Region from .env
-// });
 
 // Routes
 app.get("/healthz", healthCheck);
@@ -43,22 +45,12 @@ app.all("/healthz", (req, res) => {
 
 // Global middleware to validate unexpected query parameters and headers
 function validateFileGlobal(req, res, next) {
-  // Reject if any query parameters are provided
   if (Object.keys(req.query).length > 0) {
-    logger.warn(
-      `[${
-        req.method
-      } /v1/file] Rejected due to unexpected query parameters: ${JSON.stringify(
-        req.query
-      )}`
-    );
+    logger.warn(`Unexpected query parameters: ${JSON.stringify(req.query)}`);
     return res.status(400).send();
   }
-  // Reject if an unexpected Authorization header is provided
   if (req.headers.authorization) {
-    logger.warn(
-      `[${req.method} /v1/file] Rejected due to unexpected Authorization header`
-    );
+    logger.warn("Unexpected Authorization header");
     return res.status(400).send();
   }
   next();
@@ -66,61 +58,64 @@ function validateFileGlobal(req, res, next) {
 
 // Middleware to validate that no extra form fields are present in POST requests
 function validateFileBody(req, res, next) {
-  // For POST requests, ensure that req.body does not contain any keys
   if (req.method === "POST" && req.body && Object.keys(req.body).length > 0) {
-    logger.warn(
-      `[POST /v1/file] Rejected due to unexpected request body: ${JSON.stringify(
-        req.body
-      )}`
-    );
+    logger.warn(`Unexpected request body: ${JSON.stringify(req.body)}`);
     return res.status(400).send();
   }
   next();
 }
 
 function multerSingleFile(req, res, next) {
-  // This tells Multer to look for a field named "profilepic"
   upload.single("profilepic")(req, res, (err) => {
     if (err) {
-      // Check if the error is a MulterError (like "Unexpected field")
       if (err instanceof multer.MulterError) {
-        logger.warn(
-          `[POST /v1/file] Rejected due to Multer error: ${err.message}`
-        );
+        logger.warn(`Multer error: ${err.message}`);
         return res.status(400).send();
       }
-      // If it's some other error, pass it to the final error handler
       return next(err);
     }
     next();
   });
 }
 
-// Apply the global middleware to all /v1/file routes
+// Apply global middleware to /v1/file routes
 app.use("/v1/file", validateFileGlobal);
+
+// Middleware to track API request times and count calls
+app.use((req, res, next) => {
+  logApiCall(req.url); // Increment API call count
+  const start = Date.now();
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    logApiResponseTime(req.url, duration); // Record response time
+    logger.info(
+      `Request: ${req.method} ${req.url} | Response Time: ${duration}ms`
+    );
+  });
+  next();
+});
 
 app.post("/v1/file", multerSingleFile, validateFileBody, async (req, res) => {
   try {
     if (!req.file) {
-      logger.warn(
-        "[POST /v1/file] Rejected because no file was provided in the request"
-      );
+      logger.warn("Rejected because no file was provided in the request");
       return res.status(400).send();
     }
 
-    // Initialize the S3 client
     const id = uuidv4();
     const s3 = new AWS.S3();
-    const bucketName = process.env.S3_BUCKET; // S3 bucket name from .env
+    const bucketName = process.env.S3_BUCKET;
     const params = {
       Bucket: bucketName,
-      Key: `${id}-${req.file.originalname}`, // In production, consider adding a unique prefix/timestamp
+      Key: `${id}-${req.file.originalname}`,
       Body: req.file.buffer,
     };
 
+    const s3Start = Date.now();
     const s3Result = await s3.upload(params).promise();
+    const s3Duration = Date.now() - s3Start;
+    logS3Call("upload", s3Duration);
 
-    // Save file metadata in the database
     const fileRecord = await File.create({
       fileId: id,
       filename: req.file.originalname,
@@ -146,35 +141,33 @@ app.post("/v1/file", multerSingleFile, validateFileBody, async (req, res) => {
   }
 });
 
-// Disallow any HTTP methods on /v1/file (without ID) other than POST
+// Disallow any methods on /v1/file (without ID) other than POST
 app.all("/v1/file", (req, res) => {
   if (req.method !== "POST") {
-    logger.warn(`[${req.method} /v1/file] Rejected; only POST is allowed`);
+    logger.warn("Rejected; only POST is allowed");
     return res.status(405).send();
   }
 });
 
 app.head("/v1/file/:id", (req, res) => {
-  logger.warn(`[HEAD /v1/file/:id] Rejected; method not allowed`);
+  logger.warn("Rejected; HEAD method is not allowed on /v1/file/:id");
   return res.status(405).send();
 });
 
-// GET /v1/file/:id - Retrieve file metadata (returns a presigned S3 URL and metadata)
 app.get("/v1/file/:id", async (req, res) => {
   try {
     const fileRecord = await File.findByPk(req.params.id);
     if (!fileRecord) {
-      logger.warn(`[GET /v1/file/:id] File not found for ID: ${req.params.id}`);
+      logger.warn(`File not found for ID: ${req.params.id}`);
       return res.status(404).send();
     }
 
-    // Optionally generate a pre-signed URL for downloading the file directly from S3
     const s3 = new AWS.S3();
     const bucketName = process.env.S3_BUCKET;
     const params = {
       Bucket: bucketName,
-      Key: fileRecord.filename, // The S3 key is assumed to be stored in fileRecord.filename
-      Expires: 60, // URL valid for 60 seconds (adjust as needed)
+      Key: fileRecord.filename,
+      Expires: 60,
     };
     const signedUrl = s3.getSignedUrl("getObject", params);
 
@@ -183,66 +176,53 @@ app.get("/v1/file/:id", async (req, res) => {
       fileId: fileRecord.fileId,
       filename: fileRecord.filename,
       s3Path: fileRecord.s3Path,
-      downloadUrl: signedUrl, // Include a presigned URL to download the file
+      downloadUrl: signedUrl,
     });
   } catch (error) {
-    // console.error("Error retrieving file metadata:", error);
     logger.error("Error retrieving file metadata: " + error);
     return res.status(503).send();
   }
 });
 
-// Delete a file from S3 and remove its record from the database
 app.delete("/v1/file/:id", async (req, res) => {
   try {
     const fileRecord = await File.findByPk(req.params.id);
     if (!fileRecord) {
-      logger.warn(
-        `[DELETE /v1/file/:id] File not found for ID: ${req.params.id}`
-      );
+      logger.warn(`File not found for ID: ${req.params.id}`);
       return res.status(404).send();
     }
 
-    // Delete the file from S3
     const s3 = new AWS.S3();
     const bucketName = process.env.S3_BUCKET;
-    const params = {
-      Bucket: bucketName,
-      Key: fileRecord.filename, // Assumes fileRecord.filename is the S3 key
-    };
+    const params = { Bucket: bucketName, Key: fileRecord.filename };
+
+    const s3Start = Date.now();
     await s3.deleteObject(params).promise();
+    const s3Duration = Date.now() - s3Start;
+    logS3Call("delete", s3Duration);
 
-    // Remove the file record from the database
     await fileRecord.destroy();
-
     logger.info(`File deleted successfully: ${req.params.id}`);
     return res.status(204).send();
   } catch (error) {
-    // console.error("Error deleting file:", error);
     logger.error("Error deleting file: " + error);
     return res.status(503).send();
   }
 });
 
-// Disallow all other methods on /v1/file/:id
 app.all("/v1/file/:id", (req, res) => {
-  // If it's not GET, DELETE, or HEAD, return 405
-  logger.warn(
-    `[${req.method} /v1/file/:id] Rejected; only GET, DELETE are allowed`
-  );
+  logger.warn("Rejected; only GET, DELETE are allowed on /v1/file/:id");
   return res.status(405).send();
 });
 
 app.all("*", (req, res) => {
-  logger.warn(`[${req.method} ${req.path}] Rejected; route not defined`);
+  logger.warn("Rejected; route not defined");
   return res.status(405).send();
 });
 
-// Start the server
 if (require.main === module) {
   const server = app.listen(SERVER_PORT, () => {
     logger.info(`Server is running on port ${SERVER_PORT}`);
-    // console.log(`Server is running`);
   });
 }
 
