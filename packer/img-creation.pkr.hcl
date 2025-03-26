@@ -140,7 +140,8 @@ build {
   only = ["amazon-ebs.my-ami"]
   inline = [
     "sudo apt-get update -y",
-    "sudo apt-get install -y amazon-cloudwatch-agent",
+    "wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb -O amazon-cloudwatch-agent.deb",
+    "sudo dpkg -i amazon-cloudwatch-agent.deb",
     "sudo mkdir -p /opt/aws/amazon-cloudwatch-agent/etc",
     "sudo chmod 755 /opt/aws/amazon-cloudwatch-agent/etc"
   ]
