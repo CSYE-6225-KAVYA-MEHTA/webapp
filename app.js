@@ -7,12 +7,12 @@ const { v4: uuidv4 } = require("uuid");
 const upload = multer({ storage: multer.memoryStorage() });
 const { healthCheck } = require("./controllers/healthCheckController");
 
-// Import the File model from your models (assumed to be defined in index.js)
+// Import the File model from your models
 const { File } = require("./models/index");
 
-const logger = require("./logger"); // Logging module
-// Import the metrics middleware and S3 metrics function
-const { apiMetricsMiddleware, recordS3Operation } = require("./metrics");
+const logger = require("./logger");
+// Import metric functions
+const { recordAPICall, recordS3Operation } = require("./metrics");
 
 const app = express();
 const SERVER_PORT = process.env.SERVER_PORT || 8080;
@@ -30,19 +30,17 @@ app.use((req, res, next) => {
   });
 });
 
-// Attach the metrics middleware (records API call count & response times)
-app.use(apiMetricsMiddleware);
-
 // Routes
+
+// Health check route (delegated to the healthCheck controller which now includes explicit metric calls)
 app.get("/healthz", healthCheck);
 app.all("/healthz", (req, res) => {
   logger.warn(`Received ${req.method} request on /healthz; returning 405`);
+  recordAPICall("GET_/healthz", 0, 405);
   res.status(405).header("Cache-Control", "no-cache").send();
 });
 
-// Middleware for /v1/file endpoints
-
-// Global middleware to validate unexpected query parameters and headers
+// Global middleware for /v1/file endpoints
 function validateFileGlobal(req, res, next) {
   if (Object.keys(req.query).length > 0) {
     logger.warn(`Unexpected query parameters: ${JSON.stringify(req.query)}`);
@@ -65,6 +63,7 @@ function validateFileBody(req, res, next) {
 }
 
 function multerSingleFile(req, res, next) {
+  // Expecting the file under the "profilepic" field.
   upload.single("profilepic")(req, res, (err) => {
     if (err) {
       if (err instanceof multer.MulterError) {
@@ -77,13 +76,15 @@ function multerSingleFile(req, res, next) {
   });
 }
 
-// Apply global middleware to all /v1/file routes
+// Apply global middleware to /v1/file routes.
 app.use("/v1/file", validateFileGlobal);
 
 app.post("/v1/file", multerSingleFile, validateFileBody, async (req, res) => {
+  const startTime = Date.now();
   try {
     if (!req.file) {
       logger.warn("Rejected because no file was provided in the request");
+      recordAPICall("POST_/v1/file", Date.now() - startTime, 400);
       return res.status(400).send();
     }
 
@@ -99,7 +100,6 @@ app.post("/v1/file", multerSingleFile, validateFileBody, async (req, res) => {
     const s3Start = Date.now();
     const s3Result = await s3.upload(params).promise();
     const s3Duration = Date.now() - s3Start;
-    // Record S3 upload metrics using the updated function name
     recordS3Operation("upload", s3Duration);
 
     const fileRecord = await File.create({
@@ -110,6 +110,7 @@ app.post("/v1/file", multerSingleFile, validateFileBody, async (req, res) => {
     });
 
     logger.info(`File uploaded successfully: ${fileRecord.fileId}`);
+    recordAPICall("POST_/v1/file", Date.now() - startTime, 201);
     return res.status(201).json({
       fileId: fileRecord.fileId,
       filename: fileRecord.filename,
@@ -118,6 +119,7 @@ app.post("/v1/file", multerSingleFile, validateFileBody, async (req, res) => {
     });
   } catch (error) {
     logger.error("Failed during file upload: " + error);
+    recordAPICall("POST_/v1/file", Date.now() - startTime, 503);
     return res
       .status(503)
       .header("Cache-Control", "no-cache, no-store, must-revalidate")
@@ -127,24 +129,27 @@ app.post("/v1/file", multerSingleFile, validateFileBody, async (req, res) => {
   }
 });
 
-// Disallow any methods on /v1/file (without ID) other than POST
 app.all("/v1/file", (req, res) => {
   if (req.method !== "POST") {
     logger.warn("Rejected; only POST is allowed");
+    recordAPICall("POST_/v1/file", 0, 405);
     return res.status(405).send();
   }
 });
 
 app.head("/v1/file/:id", (req, res) => {
   logger.warn("Rejected; HEAD method is not allowed on /v1/file/:id");
+  recordAPICall("HEAD_/v1/file", 0, 405);
   return res.status(405).send();
 });
 
 app.get("/v1/file/:id", async (req, res) => {
+  const startTime = Date.now();
   try {
     const fileRecord = await File.findByPk(req.params.id);
     if (!fileRecord) {
       logger.warn(`File not found for ID: ${req.params.id}`);
+      recordAPICall("GET_/v1/file", Date.now() - startTime, 404);
       return res.status(404).send();
     }
 
@@ -156,8 +161,8 @@ app.get("/v1/file/:id", async (req, res) => {
       Expires: 60,
     };
     const signedUrl = s3.getSignedUrl("getObject", params);
-
     logger.info(`File metadata retrieved for ID: ${req.params.id}`);
+    recordAPICall("GET_/v1/file", Date.now() - startTime, 200);
     return res.status(200).json({
       fileId: fileRecord.fileId,
       filename: fileRecord.filename,
@@ -166,15 +171,18 @@ app.get("/v1/file/:id", async (req, res) => {
     });
   } catch (error) {
     logger.error("Error retrieving file metadata: " + error);
+    recordAPICall("GET_/v1/file", Date.now() - startTime, 503);
     return res.status(503).send();
   }
 });
 
 app.delete("/v1/file/:id", async (req, res) => {
+  const startTime = Date.now();
   try {
     const fileRecord = await File.findByPk(req.params.id);
     if (!fileRecord) {
       logger.warn(`File not found for ID: ${req.params.id}`);
+      recordAPICall("DELETE_/v1/file", Date.now() - startTime, 404);
       return res.status(404).send();
     }
 
@@ -185,25 +193,28 @@ app.delete("/v1/file/:id", async (req, res) => {
     const s3Start = Date.now();
     await s3.deleteObject(params).promise();
     const s3Duration = Date.now() - s3Start;
-    // Record S3 delete metrics using the updated function
     recordS3Operation("delete", s3Duration);
 
     await fileRecord.destroy();
     logger.info(`File deleted successfully: ${req.params.id}`);
+    recordAPICall("DELETE_/v1/file", Date.now() - startTime, 204);
     return res.status(204).send();
   } catch (error) {
     logger.error("Error deleting file: " + error);
+    recordAPICall("DELETE_/v1/file", Date.now() - startTime, 503);
     return res.status(503).send();
   }
 });
 
 app.all("/v1/file/:id", (req, res) => {
   logger.warn("Rejected; only GET, DELETE are allowed on /v1/file/:id");
+  recordAPICall("OTHER_/v1/file", 0, 405);
   return res.status(405).send();
 });
 
 app.all("*", (req, res) => {
   logger.warn("Rejected; route not defined");
+  recordAPICall("OTHER", 0, 405);
   return res.status(405).send();
 });
 
