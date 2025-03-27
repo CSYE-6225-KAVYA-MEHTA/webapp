@@ -3,8 +3,8 @@ const { createLogger, format, transports } = require("winston");
 // Use a different log file path for local development.
 const logFilePath =
   process.env.NODE_ENV === "test"
-    ? "./app.log" // Relative path for local dev
-    : "/opt/csye6225/app.log"; // Production path
+    ? "./logs/myapp.log" // Relative path for local dev
+    : "/opt/csye6225/logs/myapp.log"; // Production path
 
 const logger = createLogger({
   level: "info",
