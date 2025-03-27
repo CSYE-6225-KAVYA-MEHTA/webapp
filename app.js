@@ -11,8 +11,8 @@ const { healthCheck } = require("./controllers/healthCheckController");
 const { File } = require("./models/index");
 
 const logger = require("./logger"); // Logging module
-// Import the metrics middleware along with any additional metric functions if needed
-const { middleware: metricsMiddleware, logS3Call } = require("./metrics");
+// Import the metrics middleware and S3 metrics function
+const { apiMetricsMiddleware, recordS3Operation } = require("./metrics");
 
 const app = express();
 const SERVER_PORT = process.env.SERVER_PORT || 8080;
@@ -31,7 +31,7 @@ app.use((req, res, next) => {
 });
 
 // Attach the metrics middleware (records API call count & response times)
-app.use(metricsMiddleware);
+app.use(apiMetricsMiddleware);
 
 // Routes
 app.get("/healthz", healthCheck);
@@ -99,7 +99,8 @@ app.post("/v1/file", multerSingleFile, validateFileBody, async (req, res) => {
     const s3Start = Date.now();
     const s3Result = await s3.upload(params).promise();
     const s3Duration = Date.now() - s3Start;
-    logS3Call("upload", s3Duration);
+    // Record S3 upload metrics using the updated function name
+    recordS3Operation("upload", s3Duration);
 
     const fileRecord = await File.create({
       fileId: id,
@@ -184,8 +185,8 @@ app.delete("/v1/file/:id", async (req, res) => {
     const s3Start = Date.now();
     await s3.deleteObject(params).promise();
     const s3Duration = Date.now() - s3Start;
-    // Record S3 delete operation metrics
-    logS3Call("delete", s3Duration);
+    // Record S3 delete metrics using the updated function
+    recordS3Operation("delete", s3Duration);
 
     await fileRecord.destroy();
     logger.info(`File deleted successfully: ${req.params.id}`);
