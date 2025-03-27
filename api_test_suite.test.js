@@ -1,12 +1,6 @@
 const request = require("supertest");
 const { app } = require("./app.js"); // Change this if needed based on your .env PORT
 
-const { shutdownStatsD } = require("./metrics");
-
-afterAll(() => {
-  shutdownStatsD();
-});
-
 describe("API Tests", () => {
   const methods = ["post", "put", "delete", "patch", "head", "options"];
 

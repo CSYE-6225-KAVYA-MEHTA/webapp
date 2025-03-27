@@ -7,16 +7,12 @@ const { v4: uuidv4 } = require("uuid");
 const upload = multer({ storage: multer.memoryStorage() });
 const { healthCheck } = require("./controllers/healthCheckController");
 
-// Import the File model (from index.js)
+// Import the File model from your models (assumed to be defined in index.js)
 const { File } = require("./models/index");
 
 const logger = require("./logger"); // Logging module
-const {
-  logApiCall,
-  logApiResponseTime,
-  logDbQueryTime,
-  logS3Call,
-} = require("./metrics"); // Metrics module
+// Import the metrics middleware along with any additional metric functions if needed
+const { middleware: metricsMiddleware, logS3Call } = require("./metrics");
 
 const app = express();
 const SERVER_PORT = process.env.SERVER_PORT || 8080;
@@ -33,6 +29,9 @@ app.use((req, res, next) => {
     next();
   });
 });
+
+// Attach the metrics middleware (records API call count & response times)
+app.use(metricsMiddleware);
 
 // Routes
 app.get("/healthz", healthCheck);
@@ -78,22 +77,8 @@ function multerSingleFile(req, res, next) {
   });
 }
 
-// Apply global middleware to /v1/file routes
+// Apply global middleware to all /v1/file routes
 app.use("/v1/file", validateFileGlobal);
-
-// Middleware to track API request times and count calls
-app.use((req, res, next) => {
-  logApiCall(req.url); // Increment API call count
-  const start = Date.now();
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    logApiResponseTime(req.url, duration); // Record response time
-    logger.info(
-      `Request: ${req.method} ${req.url} | Response Time: ${duration}ms`
-    );
-  });
-  next();
-});
 
 app.post("/v1/file", multerSingleFile, validateFileBody, async (req, res) => {
   try {
@@ -199,6 +184,7 @@ app.delete("/v1/file/:id", async (req, res) => {
     const s3Start = Date.now();
     await s3.deleteObject(params).promise();
     const s3Duration = Date.now() - s3Start;
+    // Record S3 delete operation metrics
     logS3Call("delete", s3Duration);
 
     await fileRecord.destroy();
