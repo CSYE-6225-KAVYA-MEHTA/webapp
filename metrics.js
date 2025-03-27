@@ -18,16 +18,16 @@ afterAll(async () => {
 
 /**
  * Helper: Send a metric to CloudWatch.
- * @param {string} name - Metric name.
+ * @param {string} metricName - The name of the metric.
  * @param {Array} dimensions - Array of {Name, Value} pairs.
- * @param {string} unit - Metric unit (e.g., "Count", "Milliseconds").
- * @param {number} value - Metric value.
+ * @param {string} unit - The metric unit (e.g., "Count", "Milliseconds").
+ * @param {number} value - The metric value.
  */
-function sendMetricToCloudWatch(name, dimensions, unit, value) {
+function sendMetricToCloudWatch(metricName, dimensions, unit, value) {
   const params = {
     MetricData: [
       {
-        MetricName: name,
+        MetricName: metricName,
         Dimensions: dimensions,
         Unit: unit,
         Value: value,
@@ -38,18 +38,18 @@ function sendMetricToCloudWatch(name, dimensions, unit, value) {
 
   cloudWatchClient.putMetricData(params, (err) => {
     if (err) {
-      console.error(`Error sending ${name} metric:`, err);
+      console.error(`Error sending ${metricName} metric:`, err);
     }
   });
 }
 
 /**
- * Record API metrics:
- * - Increments a count metric for API calls.
- * - Records a timer metric for the API response time.
- * Also sends the metrics to StatsD.
- * @param {string} apiIdentifier - Unique API identifier (e.g., "GET_/healthz").
- * @param {number} responseTime - API response time in milliseconds.
+ * Record API usage metrics:
+ * - Increments a counter for API calls.
+ * - Records a timer for the API response time.
+ * Also sends metrics to StatsD.
+ * @param {string} apiIdentifier - Unique identifier (e.g., "GET_/healthz").
+ * @param {number} responseTime - Response time in milliseconds.
  * @param {number} statusCode - HTTP response status code.
  */
 function recordApiUsage(apiIdentifier, responseTime, statusCode) {
@@ -58,7 +58,6 @@ function recordApiUsage(apiIdentifier, responseTime, statusCode) {
     { Name: "Status", Value: String(statusCode) },
   ];
 
-  // CloudWatch metrics
   sendMetricToCloudWatch("APICallCount", dimensions, "Count", 1);
   sendMetricToCloudWatch(
     "APIResponseTime",
@@ -67,15 +66,14 @@ function recordApiUsage(apiIdentifier, responseTime, statusCode) {
     responseTime
   );
 
-  // StatsD metrics
   statsdClient.increment(`api.${apiIdentifier}.calls`);
   statsdClient.timing(`api.${apiIdentifier}.response_time`, responseTime);
 }
 
 /**
  * Record database query timing:
- * - Uses a timer metric to record query execution time.
- * @param {string} queryType - Type of query (if available; otherwise "unknown").
+ * - Sends a timer metric for each query executed.
+ * @param {string} queryType - Type of query (or "unknown").
  * @param {number} execTime - Execution time in milliseconds.
  */
 function recordDbQuery(queryType, execTime) {
@@ -86,8 +84,8 @@ function recordDbQuery(queryType, execTime) {
 
 /**
  * Record AWS S3 operation timing:
- * - Uses a timer metric for the S3 operation duration.
- * @param {string} operationName - S3 operation (e.g., "upload", "delete").
+ * - Sends a timer metric for each S3 call.
+ * @param {string} operationName - The S3 operation (e.g., "upload", "delete").
  * @param {number} opTime - Operation time in milliseconds.
  */
 function recordS3Operation(operationName, opTime) {
@@ -98,14 +96,12 @@ function recordS3Operation(operationName, opTime) {
 
 /**
  * Express middleware to capture API usage metrics.
- * It starts a timer when a request is received and then records the API call count
- * and response time once the response finishes.
+ * Starts a timer at request start and, on response finish, records API metrics.
  */
 function apiMetricsMiddleware(req, res, next) {
   const startTime = Date.now();
   res.on("finish", () => {
     const elapsedTime = Date.now() - startTime;
-    // Determine API identifier from method and route (fallback to path if route is undefined)
     const apiIdentifier =
       req.route && req.route.path
         ? `${req.method}_${req.route.path}`
@@ -115,7 +111,7 @@ function apiMetricsMiddleware(req, res, next) {
   next();
 }
 
-// Attach Sequelize hooks to record DB query timings if the Sequelize instance exists.
+// Attach Sequelize hooks to record database query timings if Sequelize instance exists.
 if (db.sequelize) {
   db.sequelize.addHook("beforeQuery", (options) => {
     options.__startTime = Date.now();
@@ -128,7 +124,7 @@ if (db.sequelize) {
 
 module.exports = {
   recordApiUsage,
-  recordDbQuery: recordDbQuery, // exporting for potential direct usage if needed
+  recordDbQuery,
   recordS3Operation,
   apiMetricsMiddleware,
 };
