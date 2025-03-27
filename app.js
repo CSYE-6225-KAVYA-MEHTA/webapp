@@ -12,7 +12,11 @@ const { File } = require("./models/index");
 
 const logger = require("./logger"); // Logging module
 // Import the metrics middleware along with any additional metric functions if needed
-const { middleware: metricsMiddleware, logS3Call } = require("./metrics");
+const {
+  middleware: metricsMiddleware,
+  logS3Call,
+  apiMetricsMiddleware,
+} = require("./metrics");
 
 const app = express();
 const SERVER_PORT = process.env.SERVER_PORT || 8080;
@@ -31,7 +35,7 @@ app.use((req, res, next) => {
 });
 
 // Attach the metrics middleware (records API call count & response times)
-app.use(metricsMiddleware);
+app.use(apiMetricsMiddleware);
 
 // Routes
 app.get("/healthz", healthCheck);
