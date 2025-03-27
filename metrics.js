@@ -9,13 +9,6 @@ AWS.config.update({ region: process.env.AWS_REGION });
 const cloudWatchClient = new AWS.CloudWatch();
 const statsdClient = new SDC({ host: "localhost", port: 8125 });
 
-// Jest cleanup: Close the Sequelize connection after tests complete
-afterAll(async () => {
-  if (db.sequelize) {
-    await db.sequelize.close();
-  }
-});
-
 /**
  * Helper: Send a metric to CloudWatch.
  * @param {string} metricName - The name of the metric.
