@@ -1,19 +1,18 @@
 const { Check } = require("../models/index");
 const logger = require("../logger");
+const { recordAPICall } = require("../metrics");
 
 const healthCheck = async (req, res) => {
+  const startTime = Date.now();
   try {
-    // Only allow GET requests
     if (req.method !== "GET") {
       logger.warn(`Health check received unsupported method: ${req.method}`);
+      recordAPICall("GET_/healthz", Date.now() - startTime, 405);
       return res
         .status(405)
-        .header("Cache-Control", "no-cache", "no-store", "must-revalidate")
+        .header("Cache-Control", "no-cache, no-store, must-revalidate")
         .send();
     }
-    //Object.keys(req.body).params.length > 0
-    //
-    // Reject requests with a payload
     if (
       Object.keys(req.body).length > 0 ||
       Object.keys(req.query).length > 0 ||
@@ -24,12 +23,12 @@ const healthCheck = async (req, res) => {
       logger.warn(
         "Health check request rejected due to unexpected payload or headers."
       );
+      recordAPICall("GET_/healthz", Date.now() - startTime, 400);
       return res.status(400).header("Cache-Control", "no-cache").send();
     }
-
-    // Insert a new record in the Check table
     await Check.create();
     logger.info("Health check processed successfully.");
+    recordAPICall("GET_/healthz", Date.now() - startTime, 200);
     return res
       .status(200)
       .header("Cache-Control", "no-cache, no-store, must-revalidate")
@@ -38,7 +37,7 @@ const healthCheck = async (req, res) => {
       .send();
   } catch (error) {
     logger.error("Health check failed:", error);
-    // console.error("Health check failed:", error);
+    recordAPICall("GET_/healthz", Date.now() - startTime, 503);
     return res
       .status(503)
       .header("Cache-Control", "no-cache, no-store, must-revalidate")
