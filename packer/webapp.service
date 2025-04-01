@@ -1,7 +1,7 @@
 
 [Unit]
 Description=Node.js Application
-//ConditionPathExists=/opt/csye6225/.env
+ConditionPathExists=/opt/csye6225/.env
 After=network.target
  
 
