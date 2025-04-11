@@ -105,10 +105,21 @@ jobs:
 
       - name: Update Auto Scaling Group to Use Latest Launch Template Version
         run: |
+          # Ensure the launch template version is set
+          if [ -z "${{ steps.lt_version.outputs.version }}" ]; then
+            echo "Error: Launch template version is empty. Aborting update."
+            exit 1
+          fi
+
           echo "Updating auto scaling group ${{ secrets.ASG_NAME }} with Launch Template Version ${{ steps.lt_version.outputs.version }}..."
           aws autoscaling update-auto-scaling-group \
             --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
             --launch-template "LaunchTemplateId=${{ secrets.LAUNCH_TEMPLATE_ID }},Version=${{ steps.lt_version.outputs.version }}"
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.DEMO_AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
 
       - name: Start Instance Refresh
         id: refresh
@@ -120,10 +131,10 @@ jobs:
             --output text)
           echo "refresh_id=$REFRESH_ID" >> $GITHUB_ENV
 
-          env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.DEMO_GITHUB_ACCESS_KEY }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.DEMO_GITHUB_SECRET_KEY }}
-            AWS_REGION: ${{ secrets.AWS_REGION }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DEMO_GITHUB_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DEMO_GITHUB_SECRET_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
       - name: Wait for Instance Refresh to Complete
         run: |
