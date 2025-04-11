@@ -87,8 +87,9 @@ jobs:
             --source-version 1 \
             --launch-template-data "{\"ImageId\":\"${{ steps.ami_id.outputs.ami_id }}\"}" \
             --query 'LaunchTemplateVersion.VersionNumber' \
+          )
           echo "Launch template version creation output: $output"
-          NEW_VERSION=$(echo "$output" | jq -r '.LaunchTemplateVersion.VersionNumber')
+          NEW_VERSION=$(echo "$output" | jq -r '.')
           echo "New launch template version: ${NEW_VERSION}"
           echo "NEW_LAUNCH_TEMPLATE_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
 
