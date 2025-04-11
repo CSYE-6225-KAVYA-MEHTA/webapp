@@ -64,20 +64,14 @@ jobs:
       # echo "Built AMI ID: $AMI_ID"
       # echo "AMI_ID=$AMI_ID" >> $GITHUB_ENV
 
-      - name: Get Latest AMI ID
+      - name: Get Latest AMI ID Without Owner or Prefix
         id: ami_id
         run: |
-          # Retrieve the most recent AMI ID that matches the AMI name prefix
           AMI_ID=$(aws ec2 describe-images \
-            --owners ${{ secrets.DEV_USER }} \
-            --filters "Name=name,Values=${{ secrets.AMI_NAME_PREFIX }}*" \
+            --owners self \
             --query 'Images | sort_by(@, &CreationDate) | [-1].ImageId' \
             --output text)
-
-          # Debug print to verify AMI_ID value
           echo "Latest AMI ID retrieved: ${AMI_ID}"
-
-          # Save AMI_ID for later steps
           echo "AMI_ID=${AMI_ID}" >> $GITHUB_ENV
           echo "ami_id=${AMI_ID}" >> $GITHUB_OUTPUT
 
