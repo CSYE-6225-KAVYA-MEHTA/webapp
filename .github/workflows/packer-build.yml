@@ -95,6 +95,8 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.DEMO_AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
+          LAUNCH_TEMPLATE_ID: ${{ secrets.LAUNCH_TEMPLATE_ID }} # Ensure this secret is defined
+          AMI_ID: ${{ env.AMI_ID }} # Alternatively, use the AMI_ID you already set from a previous step
 
       # - name: Update Auto Scaling Group to Use Latest Launch Template
       #   run: |
