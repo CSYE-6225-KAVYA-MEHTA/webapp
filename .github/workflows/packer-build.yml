@@ -89,11 +89,10 @@ jobs:
           output=$(aws ec2 create-launch-template-version \
             --launch-template-id ${{ secrets.LAUNCH_TEMPLATE_ID }} \
             --version-description "Updated with AMI ${AMI_ID}" \
-            --launch-template-data "{\"ImageId\": \"${AMI_ID}\"}" \
+            --launch-template-data "{\"ImageId\": \"${AMI_ID}\", \"InstanceType\": \"${{ secrets.AWS_INSTANCE_TYPE }}\"}" \
             --query 'LaunchTemplateVersion.VersionNumber' \
             --output text)
           echo "Launch template version creation output: $output"
-          # Set the output for this step so that later steps can reference it
           echo "version=$output" >> $GITHUB_OUTPUT
 
       # - name: Update Auto Scaling Group to Use Latest Launch Template
