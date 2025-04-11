@@ -67,9 +67,19 @@ jobs:
       - name: Get Latest AMI ID
         id: ami_id
         run: |
-          AMI_ID=$(grep -o 'AMI: ami-[a-z0-9]*' packer_output.log | head -n1 | cut -d' ' -f2)
-          echo "AMI_ID=$AMI_ID" >> $GITHUB_ENV
-          echo "ami_id=$AMI_ID" >> $GITHUB_OUTPUT
+          # Retrieve the most recent AMI ID that matches the AMI name prefix
+          AMI_ID=$(aws ec2 describe-images \
+            --owners ${{ secrets.DEV_USER }} \
+            --filters "Name=name,Values=${{ secrets.AMI_NAME_PREFIX }}*" \
+            --query 'Images | sort_by(@, &CreationDate) | [-1].ImageId' \
+            --output text)
+
+          # Debug print to verify AMI_ID value
+          echo "Latest AMI ID retrieved: ${AMI_ID}"
+
+          # Save AMI_ID for later steps
+          echo "AMI_ID=${AMI_ID}" >> $GITHUB_ENV
+          echo "ami_id=${AMI_ID}" >> $GITHUB_OUTPUT
 
       - name: Reconfigure AWS CLI for DEMO Account
         uses: aws-actions/configure-aws-credentials@v3
@@ -85,7 +95,7 @@ jobs:
           output=$(aws ec2 create-launch-template-version \
             --launch-template-id ${{ secrets.LAUNCH_TEMPLATE_ID }} \
             --source-version 1 \
-            --launch-template-data "{\"ImageId\":\"${{ steps.ami_id.outputs.ami_id }}\"}" \
+            --launch-template-data "{\"ImageId\": \"${AMI_ID}\"}" \
             --query 'LaunchTemplateVersion.VersionNumber' \
           )
           echo "Launch template version creation output: $output"
