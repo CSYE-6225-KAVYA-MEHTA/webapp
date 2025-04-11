@@ -6,6 +6,7 @@ on:
 
 jobs:
   build:
+    if: github.event.pull_request.merged == true
     name: packer-build
     runs-on: ubuntu-latest
 
@@ -58,3 +59,54 @@ jobs:
             -var "server_port=${{ secrets.SERVER_PORT }}" \
             -var "db_host=${{ secrets.DB_HOST }}" \
             img-creation.pkr.hcl
+
+          # Extract the AMI ID from the packer build output
+          AMI_ID=$(grep -o 'AMI: ami-[a-z0-9]*' packer_output.log | head -n1 | cut -d' ' -f2)
+          echo "Built AMI ID: $AMI_ID"
+          echo "AMI_ID=$AMI_ID" >> $GITHUB_ENV
+
+      - name: Reconfigure AWS CLI for DEMO Account
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.DEMO_AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Create New Launch Template Version
+        id: create_lt_version
+        run: |
+          echo "Creating new launch template version with AMI ${AMI_ID}..."
+          output=$(aws ec2 create-launch-template-version \
+            --launch-template-id ${{ secrets.LAUNCH_TEMPLATE_ID }} \
+            --version-description "Updated with AMI ${AMI_ID}" \
+            --launch-template-data "{\"ImageId\": \"${AMI_ID}\"}")
+          echo "Launch template version creation output: $output"
+          NEW_VERSION=$(echo "$output" | jq -r '.LaunchTemplateVersion.VersionNumber')
+          echo "New launch template version: ${NEW_VERSION}"
+          echo "NEW_LAUNCH_TEMPLATE_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
+
+      - name: Update Auto Scaling Group to Use Latest Launch Template
+        run: |
+          echo "Updating auto scaling group ${{ secrets.ASG_NAME }} to use launch template version ${NEW_LAUNCH_TEMPLATE_VERSION}..."
+          aws autoscaling update-auto-scaling-group --auto-scaling-group-name ${{ secrets.ASG_NAME }} --launch-template "LaunchTemplateId=${{ secrets.LAUNCH_TEMPLATE_ID }},Version=${NEW_LAUNCH_TEMPLATE_VERSION}"
+
+      - name: Initiate Instance Refresh
+        id: instance_refresh
+        run: |
+          echo "Starting instance refresh for auto scaling group ${{ secrets.ASG_NAME }}..."
+          aws autoscaling start-instance-refresh --auto-scaling-group-name ${{ secrets.ASG_NAME }} --preferences '{"InstanceWarmup": 300, "MinHealthyPercentage": 90}'
+
+      - name: Wait for Instance Refresh to Complete
+        run: |
+          echo "Waiting for instance refresh to complete..."
+          status=""
+          while [ "$status" != "Successful" ] && [ "$status" != "Failed" ]; do
+            status=$(aws autoscaling describe-instance-refreshes --auto-scaling-group-name ${{ secrets.ASG_NAME }} --query 'InstanceRefreshes[0].Status' --output text)
+            echo "Instance refresh status: $status"
+            sleep 30
+          done
+          if [ "$status" != "Successful" ]; then
+            echo "Instance refresh failed. Exiting workflow with failure."
+            exit 1
+          fi
+          echo "Instance refresh completed successfully."
