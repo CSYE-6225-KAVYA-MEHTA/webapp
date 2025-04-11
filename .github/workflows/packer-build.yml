@@ -158,14 +158,9 @@ jobs:
           REFRESH_ID=$(aws autoscaling start-instance-refresh \
             --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
             --preferences '{"MinHealthyPercentage": 90, "InstanceWarmup": 300}' \
-            --query "InstanceRefreshId" \
+            --query 'InstanceRefreshId' \
             --output text)
-          echo "refresh_id=$REFRESH_ID" >> $GITHUB_ENV
-
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.DEMO_GITHUB_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.DEMO_GITHUB_SECRET_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          echo "refresh_id=$REFRESH_ID" >> $GITHUB_OUTPUT
 
       - name: Wait for Instance Refresh to Complete
         run: |
