@@ -85,7 +85,7 @@ jobs:
           output=$(aws ec2 create-launch-template-version \
             --launch-template-id ${{ secrets.LAUNCH_TEMPLATE_ID }} \
             --source-version 1 \
-            --launch-template-data "{\"ImageId\":\"${{ steps.ami_id.outputs.ami_id }}\"}" \
+            --launch-template-data "{\"ImageId\": \"${AMI_ID}\"}" \
             --query 'LaunchTemplateVersion.VersionNumber' \
           )
           echo "Launch template version creation output: $output"
