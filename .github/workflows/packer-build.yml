@@ -64,16 +64,24 @@ jobs:
       # echo "Built AMI ID: $AMI_ID"
       # echo "AMI_ID=$AMI_ID" >> $GITHUB_ENV
 
-      - name: Get Latest AMI ID Without Owner or Prefix
+      # Explicitly share AMI with DEMO account
+
+      - name: Get Latest AMI ID
         id: ami_id
         run: |
           AMI_ID=$(aws ec2 describe-images \
-            --owners self \
+            --executable-users self \
             --query 'Images | sort_by(@, &CreationDate) | [-1].ImageId' \
             --output text)
           echo "Latest AMI ID retrieved: ${AMI_ID}"
           echo "AMI_ID=${AMI_ID}" >> $GITHUB_ENV
           echo "ami_id=${AMI_ID}" >> $GITHUB_OUTPUT
+
+      - name: Share AMI with DEMO Account
+        run: |
+          aws ec2 modify-image-attribute \
+            --image-id ${{ steps.ami_id.outputs.ami_id }} \
+            --launch-permission "Add=[{UserId=${{ secrets.DEMO_USER }}}]"
 
       - name: Reconfigure AWS CLI for DEMO Account
         uses: aws-actions/configure-aws-credentials@v3
