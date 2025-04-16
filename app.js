@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require("uuid");
 
 const upload = multer({ storage: multer.memoryStorage() });
 const { healthCheck } = require("./controllers/healthCheckController");
-
+const { healthCheckcicd } = require("./controllers/healthCheckController");
 // Import the File model from your models
 const { File } = require("./models/index");
 
@@ -37,6 +37,13 @@ app.get("/healthz", healthCheck);
 app.all("/healthz", (req, res) => {
   logger.warn(`Received ${req.method} request on /healthz; returning 405`);
   recordAPICall("GET_/healthz", 0, 405);
+  res.status(405).header("Cache-Control", "no-cache").send();
+});
+
+app.get("/cicd", healthCheckcicd);
+app.all("/cicd", (req, res) => {
+  logger.warn(`Received ${req.method} request on /cicd; returning 405`);
+  recordAPICall("GET_/cicd", 0, 405);
   res.status(405).header("Cache-Control", "no-cache").send();
 });
 
