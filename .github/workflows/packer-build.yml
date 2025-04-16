@@ -59,18 +59,12 @@ jobs:
             -var "db_host=${{ secrets.DB_HOST }}" \
             img-creation.pkr.hcl
 
-      # # Extract the AMI ID from the packer build output
-      # AMI_ID=$(grep -o 'AMI: ami-[a-z0-9]*' packer_output.log | head -n1 | cut -d' ' -f2)
-      # echo "Built AMI ID: $AMI_ID"
-      # echo "AMI_ID=$AMI_ID" >> $GITHUB_ENV
-
-      # Explicitly share AMI with DEMO account
-
       - name: Get Latest AMI ID
         id: ami_id
         run: |
           AMI_ID=$(aws ec2 describe-images \
-            --executable-users self \
+            --owners self \
+            --filters "Name=name,Values=csye6225_*" \
             --query 'Images | sort_by(@, &CreationDate) | [-1].ImageId' \
             --output text)
           echo "Latest AMI ID retrieved: ${AMI_ID}"
@@ -130,35 +124,18 @@ jobs:
           echo "Updating auto scaling group ${{ secrets.ASG_NAME }} with Launch Template Version ${{ steps.lt_version.outputs.version }}..."
           aws autoscaling update-auto-scaling-group \
             --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
-            --launch-template "LaunchTemplateId=${{ secrets.LAUNCH_TEMPLATE_ID }}"
+            --launch-template "LaunchTemplateId=${{ secrets.LAUNCH_TEMPLATE_ID }},Version=${{ steps.lt_version.outputs.version }}"
+
+          # echo "Updating auto scaling group ${{ secrets.ASG_NAME }} with Launch Template Version ${{ steps.lt_version.outputs.version }}..."
+          # aws autoscaling update-auto-scaling-group \
+          #   --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
+          #   --launch-template "LaunchTemplateId=${{ secrets.LAUNCH_TEMPLATE_ID }},
+          #   Version=${{ steps.lt_version.outputs.version }}"
         env:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.DEMO_AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
-
-      # - name: Update Auto Scaling Group to Use Latest Launch Template
-      #   run: |
-      #     echo "Updating auto scaling group ${{ secrets.ASG_NAME }} to use launch template version ${NEW_LAUNCH_TEMPLATE_VERSION}..."
-      #     aws autoscaling update-auto-scaling-group --auto-scaling-group-name ${{ secrets.ASG_NAME }} --launch-template "LaunchTemplateName=${{ secrets.LAUNCH_TEMPLATE_NAME }},Version=${NEW_LAUNCH_TEMPLATE_VERSION}"
-
-      # - name: Update Auto Scaling Group to Use Latest Launch Template Version
-      #   run: |
-      #     # Ensure the launch template version is set
-      #     if [ -z "${{ steps.lt_version.outputs.version }}" ]; then
-      #       echo "Error: Launch template version is empty. Aborting update."
-      #       exit 1
-      #     fi
-
-      #     echo "Updating auto scaling group ${{ secrets.ASG_NAME }} with Launch Template Version ${{ steps.lt_version.outputs.version }}..."
-      #     aws autoscaling update-auto-scaling-group \
-      #       --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
-      #       --launch-template "LaunchTemplateId=${{ secrets.LAUNCH_TEMPLATE_ID }},Version=${{ steps.lt_version.outputs.version }}"
-      #   env:
-      #     AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-      #     AWS_REGION: ${{ secrets.AWS_REGION }}
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.DEMO_AWS_ACCESS_KEY }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
 
       - name: Start Instance Refresh
         id: refresh
