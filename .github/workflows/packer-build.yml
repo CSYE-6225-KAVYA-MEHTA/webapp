@@ -63,7 +63,8 @@ jobs:
         id: ami_id
         run: |
           AMI_ID=$(aws ec2 describe-images \
-            --executable-users self \
+            --owners self \
+            --filters "Name=name,Values=csye6225_*" \
             --query 'Images | sort_by(@, &CreationDate) | [-1].ImageId' \
             --output text)
           echo "Latest AMI ID retrieved: ${AMI_ID}"
