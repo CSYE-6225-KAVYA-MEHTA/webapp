@@ -92,5 +92,4 @@ const healthCheckcicd = async (req, res) => {
   }
 };
 
-module.exports = { healthCheck };
-module.exports = { healthCheckcicd };
+module.exports = { healthCheck, healthCheckcicd };
